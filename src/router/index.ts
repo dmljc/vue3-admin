@@ -1,22 +1,64 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
+import Layouts from '@/layout/index.vue';
+
+export const constantRouterMap = [
+    {
+        path: '/login',
+        component: () => import('@/views/login/index.vue'),
+        hidden: true
+    },
+    {
+        path: '/401',
+        name: '401',
+        component: () => import('@/components/Error/401.vue'),
+        hidden: true
+    },
+    {
+        path: '/403',
+        name: '403',
+        component: () => import('@/components/Error/403.vue'),
+        hidden: true
+    },
+    {
+        path: '/404',
+        name: '404',
+        component: () => import('@/components/Error/404.vue'),
+        hidden: true
+    }
+];
+
+export const asyncRouterMap = [
+    {
+        path: '/',
+        component: Layouts,
+        redirect: '/home',
+        children: [
+            {
+                path: '/home',
+                name: 'home',
+                component: () => import('@/views/home/index.vue'),
+                meta: {
+                    title: '首页',
+                    icon: 'home'
+                }
+            },
+            {
+                path: '/role',
+                name: 'role',
+                component: () => import('@/views/role/index.vue'),
+                meta: {
+                    title: '角色',
+                    icon: 'role'
+                }
+            }
+        ]
+    }
+];
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
-    routes: [
-        {
-            path: '/',
-            name: 'home',
-            component: () => import('@/views/home/index.vue')
-        },
-        {
-            path: '/role',
-            name: 'role',
-            // route level code-splitting
-            // this generates a separate chunk (About.[hash].js) for this route
-            // which is lazy-loaded when the route is visited.
-            component: () => import('@/views/role/index.vue')
-        }
-    ]
+    routes: [...constantRouterMap, ...asyncRouterMap] as RouteRecordRaw[]
 });
 
 export default router;
