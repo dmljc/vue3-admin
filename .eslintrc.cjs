@@ -3,7 +3,7 @@ require('@rushstack/eslint-patch/modern-module-resolution');
 
 module.exports = {
     root: true,
-    'extends': [
+    extends: [
         'plugin:vue/vue3-essential',
         'eslint:recommended',
         '@vue/eslint-config-typescript',
@@ -14,8 +14,10 @@ module.exports = {
     },
     rules: {
         // 行尾需要有分号
-        semi: ["error", "always"],
+        semi: ['error', 'always'],
         // 使用 4 个空格缩进
-        indent: ["error", 4],
-    },
+        indent: ['error', 4],
+        // 文件名为多词语
+        'vue/multi-word-component-names': 'off'
+    }
 };
