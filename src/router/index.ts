@@ -2,6 +2,43 @@ import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import Layouts from '@/layout/index.vue';
 
+export const asyncRouterMap = [
+    {
+        path: '/',
+        component: Layouts,
+        redirect: '/home',
+        meta: {
+            title: 'Ant Admin'
+        },
+        children: [
+            {
+                path: '/home',
+                name: 'home',
+                component: () => import('@/views/home/index.vue'),
+                meta: {
+                    title: '首页'
+                }
+            },
+            {
+                path: '/user',
+                name: 'user',
+                component: () => import('@/views/user/index.vue'),
+                meta: {
+                    title: '用户管理'
+                }
+            },
+            {
+                path: '/role',
+                name: 'role',
+                component: () => import('@/views/role/index.vue'),
+                meta: {
+                    title: '角色管理'
+                }
+            }
+        ]
+    }
+];
+
 export const constantRouterMap = [
     {
         path: '/login',
@@ -25,34 +62,6 @@ export const constantRouterMap = [
         name: '404',
         component: () => import('@/components/Error/404.vue'),
         hidden: true
-    }
-];
-
-export const asyncRouterMap = [
-    {
-        path: '/',
-        component: Layouts,
-        redirect: '/home',
-        children: [
-            {
-                path: '/home',
-                name: 'home',
-                component: () => import('@/views/home/index.vue'),
-                meta: {
-                    title: '首页',
-                    icon: 'home'
-                }
-            },
-            {
-                path: '/role',
-                name: 'role',
-                component: () => import('@/views/role/index.vue'),
-                meta: {
-                    title: '角色',
-                    icon: 'role'
-                }
-            }
-        ]
     }
 ];
 

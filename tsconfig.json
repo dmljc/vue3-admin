@@ -9,7 +9,6 @@
         }
     ],
     "compilerOptions": {
-        "types": ["element-plus/global"],
         "moduleResolution": "node"
     },
     "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],

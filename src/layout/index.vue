@@ -1,55 +1,82 @@
 <template>
-    <!-- <div class="common-layout"> -->
-    <el-container class="layout-container">
-        <el-aside width="200px">Aside</el-aside>
-        <el-container>
-            <el-header>Header</el-header>
-            <el-main>
-                <router-view />
-            </el-main>
-            <el-footer>Footer</el-footer>
-        </el-container>
-    </el-container>
-    <!-- </div> -->
+    <a-layout>
+        <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
+            <div class="logo">{{ asyncRouterMap[0].meta.title }}</div>
+            <a-menu
+                v-model:selectedKeys="selectedKeys"
+                theme="dark"
+                mode="inline"
+                @click="clickMenuItem"
+            >
+                <a-menu-item v-for="item in asyncRouterMap[0]?.children" :key="item.path">
+                    <span>{{ item.meta.title }}</span>
+                </a-menu-item>
+            </a-menu>
+        </a-layout-sider>
+        <a-layout>
+            <a-layout-header style="background: #fff; padding: 0">
+                <menu-unfold-outlined
+                    v-if="collapsed"
+                    class="trigger"
+                    @click="() => (collapsed = !collapsed)"
+                />
+                <menu-fold-outlined
+                    v-else
+                    class="trigger"
+                    @click="() => (collapsed = !collapsed)"
+                />
+            </a-layout-header>
+            <a-layout-content
+                :style="{
+                    margin: '24px 16px',
+                    padding: '24px',
+                    background: '#fff',
+                    minHeight: '280px'
+                }"
+            >
+                <RouterView />
+            </a-layout-content>
+        </a-layout>
+    </a-layout>
 </template>
+<script lang="ts" setup>
+import { ref } from 'vue';
+import { RouterView, useRouter } from 'vue-router';
+import {
+    MenuUnfoldOutlined,
+    MenuFoldOutlined
+} from '@ant-design/icons-vue';
+import { asyncRouterMap } from '../router/index';
 
+const selectedKeys = ref<string[]>(['home']);
+const collapsed = ref<boolean>(false);
+
+const router = useRouter();
+
+const clickMenuItem = ({ item, key, keyPath }) => {
+    selectedKeys.value = keyPath;
+    router.push(key);
+};
+</script>
 <style scoped>
-.layout-container {
-    width: 100vw;
-    height: 100vh;
-}
-.el-header,
-.el-footer {
-    background-color: #b3c0d1;
-    color: #333;
-    text-align: center;
-    line-height: 60px;
+.trigger {
+    font-size: 18px;
+    line-height: 64px;
+    padding: 0 24px;
+    cursor: pointer;
+    transition: color 0.3s;
 }
 
-.el-aside {
-    background-color: #d3dce6;
-    color: #333;
-    text-align: center;
-    line-height: 200px;
+.trigger:hover {
+    color: #1890ff;
+}
+.logo {
+    height: 32px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 16px;
 }
 
-.el-main {
-    background-color: #e9eef3;
-    color: #333;
-    text-align: center;
-    line-height: 160px;
-}
-
-body > .el-container {
-    margin-bottom: 40px;
-}
-
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-    line-height: 260px;
-}
-
-.el-container:nth-child(7) .el-aside {
-    line-height: 320px;
+.site-layout .site-layout-background {
+    background: #fff;
 }
 </style>
