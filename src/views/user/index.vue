@@ -14,8 +14,9 @@
 </template>
 
 <script lang="ts" setup>
+import { message } from 'ant-design-vue';
 import { ref } from 'vue';
-import { userList } from './api';
+import { userList, deleteUser } from './api';
 import CreateModal from './CreateModal.vue';
 
 const dataSource = ref([]);
@@ -88,8 +89,12 @@ const onUpdate = (record: any) => {
 };
 
 const onDelete = async (record) => {
-    debugger;
-    await getList();
+    const { data } = await deleteUser({
+        id: record?.id
+    });
+    
+    data && getList();
+    message.success('删除成功');
 };
 </script>
 <style scoped></style>
