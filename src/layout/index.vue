@@ -42,10 +42,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
-import {
-    MenuUnfoldOutlined,
-    MenuFoldOutlined
-} from '@ant-design/icons-vue';
+import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue';
 import { asyncRouterMap } from '../router/index';
 
 const selectedKeys = ref<string[]>(['home']);
@@ -53,7 +50,7 @@ const collapsed = ref<boolean>(false);
 
 const router = useRouter();
 
-const clickMenuItem = ({ item, key, keyPath }) => {
+const clickMenuItem = ({ key, keyPath }) => {
     selectedKeys.value = keyPath;
     router.push(key);
 };
