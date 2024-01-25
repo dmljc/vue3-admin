@@ -14,41 +14,32 @@ export const createAxiosByinterceptors = (config?: AxiosRequestConfig): AxiosIns
 
     // 添加请求拦截器
     instance.interceptors.request.use(
-        function (config: any) {
-            // 在发送请求之前做些什么
-            // console.log('config:', config);
-            // config.headers.Authorization = vm.$Cookies.get("vue_admin_token");
+        (config) => {
+            const token = '222';
+            config.headers.authorization = 'Bearer ' + token;
             return config;
         },
-        function (error) {
-            // 对请求错误做些什么
+        (error) => {
+            message.error('网络错误，请稍后重试');
             return Promise.reject(error);
         }
     );
 
     // 添加响应拦截器
     instance.interceptors.response.use(
-        function (response) {
-            // 对响应数据做点什么
-            console.log('response:', response);
-            const { data } = response;
-            const { code } = data;
-            if (code === 200) {
-                return data;
-            } else if (code === 401) {
-                // jumpLogin();
-            } else {
-                return Promise.reject(response.data);
+        (config) => {
+            const { data } = config;
+            if (data?.success === false) {
+                message.error(data?.message);
             }
+            return data;
         },
-        function (error) {
-            // 对响应错误做点什么
-            // if (error.response) {
-            //     if (error.response.status === 401) {
-            //         // jumpLogin();
-            //     }
-            // }
-            message.error(error?.response?.data?.message || '服务端异常');
+        (error) => {
+            const { response } = error;
+            const { data } = response;
+            if (data?.success === false) {
+                message.error(data?.message);
+            }
             return Promise.reject(error);
         }
     );

@@ -44,8 +44,8 @@ const formState = reactive<FormState>({
 });
 const onFinish = async (values: any) => {
     console.log('Success:', values);
-    const { data } = await login(values);
-    if (data) {
+    const { success } = await login(values);
+    if (success) {
         message.success('登录成功');
     }
 };
