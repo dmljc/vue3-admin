@@ -6,15 +6,13 @@ import { onMounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-// ≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠虚拟场景≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠
-
-/**
- * 1、创建3D场景对象Scene
+/*
+ * 创建3D场景对象Scene
  */
 const scene = new THREE.Scene();
 
-/**
- * 1.1、创建网格模型
+/*
+ * 创建网格模型
  */
 
 // 定义几何体 长方形 BoxGeometry 长宽高都是50
@@ -22,7 +20,7 @@ const geometry = new THREE.BoxGeometry(50, 50, 50);
 
 // 创建一个材质对象
 // 一种非光泽表面的材质 MeshLambertMaterial，没有镜面高光。
-// 该材质使用基于非物理的Lambertian模型来计算反射率。
+// 该材质使用基于非物理的 Lambertian模型来计算反射率。
 const material = new THREE.MeshLambertMaterial({
     color: '#f66' // 设置材质颜色
 });
@@ -36,7 +34,7 @@ mesh.position.set(0, 0, 0);
 scene.add(mesh);
 
 /*
- * 3、创建辅助坐标轴
+ * 创建辅助坐标轴
  */
 
 //  AxesHelper 用于简单模拟3个坐标轴的对象.
@@ -47,7 +45,7 @@ const axesHelper = new THREE.AxesHelper(200);
 scene.add(axesHelper);
 
 /*
- * 4、添加光源
+ * 添加光源
  */
 
 // 环境光 AmbientLight 会均匀的照亮场景中的所有物体，但是不能用来投射阴影，因为它没有方向。
@@ -64,9 +62,8 @@ scene.add(pointLight);
 const pointLightHelper = new THREE.PointLightHelper(pointLight, 20, 0xff0000);
 scene.add(pointLightHelper);
 
-// ≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠虚拟相机≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠
 /*
- * 2、创建透视投影相机
+ * 创建透视投影相机
  */
 
 // width和height用来设置渲染后，输出的画布宽高度。
@@ -84,10 +81,10 @@ camera.position.set(200, 200, 200);
 //相机观察目标指向Three.js坐标系原点
 camera.lookAt(0, 0, 0);
 
-// ≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠渲染器，执行渲染操作≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠
 /*
- * 3、创建3D渲染器
+ * 创建3D渲染器
  */
+
 const renderer = new THREE.WebGLRenderer();
 //设置three.js渲染区域的尺寸(像素px)
 renderer.setSize(width, height);
