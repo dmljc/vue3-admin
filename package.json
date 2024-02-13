@@ -17,10 +17,12 @@
     },
     "dependencies": {
         "@ant-design/icons-vue": "^7.0.1",
+        "@types/three": "^0.161.2",
         "ant-design-vue": "4.x",
         "axios": "^1.6.5",
         "dayjs": "^1.11.10",
         "pinia": "^2.1.7",
+        "three": "^0.161.0",
         "vue": "^3.4.15",
         "vue-router": "^4.2.5"
     },
