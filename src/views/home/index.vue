@@ -11,10 +11,8 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 const scene = new THREE.Scene();
 
 const geometry = new THREE.BoxGeometry(30, 30, 30); 
-const material = new THREE.MeshPhongMaterial({ 
-    color: '#f66',
-    // transparent: true,
-    // opacity: 0.9,
+const material = new THREE.MeshLambertMaterial({ 
+    color: 0xff0000,
 });
 
 // 创建网格模型，参数是几何体和材质对象，表示生活中的一个物体
@@ -31,6 +29,7 @@ pointLight.position.set(60, 0, 0);
 
 scene.add(pointLight);
 
+// 点光源辅助观察
 const pointLightHelper = new THREE.PointLightHelper(pointLight, 4, 0xff0000);
 scene.add(pointLightHelper);
 
@@ -76,10 +75,21 @@ const obj = {
     y: 0,
     z: 0,
     color: 0x00ffff,
+    translate: 0,
+    bool: false,
 };
-gui.add(ambientLight, 'intensity', 0, 2).name('环境光强度').step(0.1);
-gui.add(pointLight, 'intensity', 0, 2).name('点光源强度').step(0.1);
 
+// 生成颜色值改变的交互界面
+gui.addColor(obj, 'color').name('材质颜色').onChange((value) => {
+    mesh.material.color.set(value);
+});
+
+const lightFolfer = gui.addFolder('光源');
+
+lightFolfer.add(ambientLight, 'intensity', 0, 2).name('环境光强度').step(0.1);
+lightFolfer.add(pointLight, 'intensity', 0, 2).name('点光源强度').step(0.1);
+
+// 重新定义网格模型的位置
 gui.add(obj, 'x', 0, 180).onChange((value) => {
     mesh.position.x = value;
 });
@@ -90,10 +100,26 @@ gui.add(obj, 'z', 0, 180).onChange((value) => {
     mesh.position.z = value;
 });
 
-// 生成颜色值改变的交互界面
-gui.addColor(obj, 'color').onChange(function(value){
-    mesh.material.color.set(value);
-});
+// 平移
+// gui.add(obj, 'translate', [-100, 0, 100]).name('沿Y轴移动').onChange((value) => {
+//     mesh.position.y = value;
+// });
+// gui.add(obj, 'translate', {
+//     // left: -100, center: 0, right: 100
+//     左: -100,
+//     中: 0,
+//     右: 100
+// }).name('沿X轴移动').onChange((value) => {
+//     mesh.position.x = value;
+// })
+
+// 单选 radio
+// gui.add(obj, 'bool').name('是否沿Y轴旋转60度').onChange((value) => {
+//     mesh.rotateY(value ? 60 : -60);
+// });
+
+gui.domElement.style.top = '112px';
+gui.domElement.style.right = '48px';
 
 // resize 事件会在窗口被调整大小时发生
 window.addEventListener('resize', () => {
@@ -104,6 +130,9 @@ window.addEventListener('resize', () => {
     // 如果相机的一些属性发生了变化，需要执行 updateProjectionMatrix ()方法更新相机的投影矩阵
     camera.updateProjectionMatrix();
 });
+
+// 设置 Canvas 背景颜色和官网demo一致。
+renderer.setClearColor(0x444544, 1);
 
 onMounted(() => {
     document.getElementById('container')?.appendChild(renderer.domElement);
