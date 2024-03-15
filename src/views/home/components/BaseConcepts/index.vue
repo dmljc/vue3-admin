@@ -138,6 +138,7 @@ renderer.setClearColor(0x444544, 1);
 
 onMounted(() => {
     document.getElementById('container')?.appendChild(renderer.domElement);
+    renderer.render(scene, camera);
 });
 </script>
 <style scoped lang="less">
