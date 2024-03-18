@@ -5,32 +5,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
 
 const webgl = ref(null);
 const scene = new THREE.Scene();
 
-const geometry = new THREE.BoxGeometry(40, 40, 40);
-const texLoader = new THREE.TextureLoader();
-const texture = texLoader.load('/earth.jpg');
-const material = new THREE.MeshLambertMaterial({
-    map: texture,
-    // color: 0xffffff
+const loader = new GLTFLoader();
+
+loader.load('/图维建模数据/tw.gltf', (gltf) => {
+    console.log('===========gltf====>', gltf.scene);
+    scene.add(gltf.scene);
+    gltf.scene.scale.set(30,30,30);
+    renderer.render(scene, camera); 
 });
-const mesh = new THREE.Mesh(geometry, material);
-
-
-// const loader = new GLTFLoader();
-
-// loader.load('/gltf.gltf', (gltf) => {
-//     console.log('===========gltf====>', gltf.scene);
-//     scene.add(gltf.scene);
-// });
-
-
-scene.add(mesh); 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight); 
@@ -38,7 +28,7 @@ scene.add(ambientLight);
 const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
-camera.position.set(292, 223, 185); 
+camera.position.set(-340, 212, 91); 
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({
@@ -54,44 +44,23 @@ scene.add(axesHelper);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.addEventListener('change', function () {
     renderer.render(scene, camera);
+    console.log('camera.position',  camera.position)
 });
 
-renderer.setClearColor(0x444544, 1);
 
-const gui = new GUI();
-const obj = {
-    x: 0,
-    y: 0,
-    z: 0,
-    color: 0x00ff00,
-};
-
-gui.add(obj, 'x', 0, 200).onChange((val) => {
-    mesh.position.x = val;
+// resize 事件会在窗口被调整大小时发生
+window.addEventListener('resize', () => {
+    const w = window.innerWidth - 296;
+    const h = window.innerHeight - 136;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
     renderer.render(scene, camera);
+    // 如果相机的一些属性发生了变化，需要执行 updateProjectionMatrix ()方法更新相机的投影矩阵
+    camera.updateProjectionMatrix();
 });
-gui.add(obj, 'y', 0, 200).onChange((val) => {
-    mesh.position.y = val;
-    renderer.render(scene, camera);
-});
-gui.add(obj, 'z', 0, 200).onChange((val) => {
-    mesh.position.z = val;
-    renderer.render(scene, camera);
-});
-
-gui.addColor(obj, 'color').onChange((val) => {
-    mesh.material.color.set(val);
-    renderer.render(scene, camera);
-});
-
-gui.domElement.style.top = '112px';
-gui.domElement.style.right = '48px';
-
-
 
 
 onMounted(() => {
-    renderer.render(scene, camera); 
     webgl.value.appendChild(renderer.domElement);
 });
 </script>
