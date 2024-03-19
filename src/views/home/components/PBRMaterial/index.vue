@@ -9,27 +9,36 @@ import model from './model';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const webgl = ref(null);
+// 场景
 const scene = new THREE.Scene();
 scene.add(model);
 
+// 辅助观察坐标系
+const axesHelper = new THREE.AxesHelper(100);
+scene.add(axesHelper);
+
+// 灯光
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(400, 200, 300);
+scene.add(directionalLight);
+// 环境光
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
 
+// 相机
 const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
 camera.position.set(-340, 212, 91);
 camera.lookAt(0, 0, 0);
 
+// 渲染器
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 renderer.setSize(width, height);
 
-// 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(100);
-scene.add(axesHelper);
-
+// 相机轨道控制器
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.addEventListener('change', function () {
     renderer.render(scene, camera);
@@ -48,7 +57,7 @@ window.addEventListener('resize', () => {
 
 onMounted(() => {
     // 设置 Canvas 背景颜色和官网demo一致。
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x444544, 1);
     renderer.render(scene, camera);
     webgl.value.appendChild(renderer.domElement);
