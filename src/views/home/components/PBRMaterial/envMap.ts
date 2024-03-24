@@ -14,20 +14,15 @@ const model = new THREE.Group();
 loader.load('/金属.glb', (gltf) => {
     gltf.scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
-            console.log('material', obj.material)
+            console.log('material', obj.material);
             obj.material.metalness = 1.0; //金属度
             obj.material.roughness = 0.2; //表面粗糙度
             // obj.material.envMap = cubeTexture; //设置环境贴图
             // obj.material.envMapIntensity = 1.0; //默认值1, 设置为0.0,相当于没有环境贴图
         }
-    })
+    });
 
-    model.add(gltf.scene)
+    model.add(gltf.scene);
 });
 
 export default model;
-
-
-
-
-
