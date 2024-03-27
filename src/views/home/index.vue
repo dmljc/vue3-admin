@@ -4,7 +4,8 @@
     <!-- <dome /> -->
     <!-- <uv-texture /> -->
     <!-- <blender /> -->
-    <PBRMaterial />
+    <!-- <PBRMaterial /> -->
+    <canvas-event />
 </template>
 
 <script setup lang="ts">
@@ -13,5 +14,6 @@
 // import Dome from './components/Demo/index.vue';
 // import UvTexture from './components/UvTexture/index.vue';
 // import Blender from './components/Blender/index.vue';
-import PBRMaterial from './components/PBRMaterial/index.vue';
+// import PBRMaterial from './components/PBRMaterial/index.vue';
+import CanvasEvent from './components/CanvasEvent/index.vue';
 </script>

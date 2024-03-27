@@ -5,6 +5,9 @@ import gui from './gui';
 // 创建材质子菜单
 const matFolder = gui.addFolder('车外壳材质');
 
+// 创建前挡风玻璃子菜单
+const glassFolder = gui.addFolder('前挡风玻璃材质');
+
 // 创建一个gltf加载器
 
 const loader = new GLTFLoader();
@@ -22,6 +25,8 @@ loader.load('/轿车.glb', (gltf) => {
 
     // 车外壳包含多个Mesh，获取其中一个
     const mesh = gltf.scene.getObjectByName('外壳01');
+    const glassMesh = gltf.scene.getObjectByName('玻璃01');
+
     mesh.material = new THREE.MeshPhysicalMaterial({
         color: mesh.material.color,
         metalness: 0.9, // 金属度
@@ -30,6 +35,15 @@ loader.load('/轿车.glb', (gltf) => {
         clearcoatRoughness: 0.01, // 清漆层粗糙度
         envMap: textureCube, // 环境贴图
         envMapIntensity: 1 // 环境贴图对mesh表面影响层度
+    });
+
+    glassMesh.material = new THREE.MeshPhysicalMaterial({
+        metalness: 0,
+        roughness: 0,
+        envMap: textureCube,
+        envMapIntensity: 1,
+        transmission: 1,
+        ior: 1.5
     });
 
     const obj = {
@@ -51,6 +65,9 @@ loader.load('/轿车.glb', (gltf) => {
     matFolder.add(mesh.material, 'clearcoat', 0, 1).name('清漆层clearcoat');
     matFolder.add(mesh.material, 'clearcoatRoughness', 0, 1);
     matFolder.add(mesh.material, 'envMapIntensity', 0, 10);
+
+    glassFolder.add(glassMesh.material, 'transmission', 0, 1).name('透光率transmission');
+    glassFolder.add(glassMesh.material, 'ior', 1, 2.333).name('ior折射率');
 });
 
 export default model;
