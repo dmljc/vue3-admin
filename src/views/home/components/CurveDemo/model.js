@@ -1,31 +1,39 @@
 import * as THREE from 'three';
 
-// 坐标数据
-const pointsArr = [
-    // 三维向量Vector3表示的坐标值
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(0, 10, 0),
-    new THREE.Vector3(0, 10, 10),
-    new THREE.Vector3(0, 0, 10)
+// 绘制椭圆弧线
+// 参数1和2表示椭圆中心坐标，参数3和4表示x和y方向半径
+const arc = new THREE.EllipseCurve(0, 0, 20, 10);
 
-    // 三维向量Vector2表示的坐标值
-    // new THREE.Vector2(0,0),
-    // new THREE.Vector2(100,0),
-    // new THREE.Vector2(100,100),
-    // new THREE.Vector2(0,100),
-];
+// getPoints 返回Vector2 对象作为元素组成的数组;
+// 分段数50，返回51个顶点
+const pointsArr = arc.getPoints(50);
+
+// getSpacedPoints 函数表示 曲线上等间距取点
+// const pointsArr = arc.getSpacedPoints(50);
 
 const geometry = new THREE.BufferGeometry();
-// 把数组pointsArr里面的坐标数据提取出来，赋值给`geometry.attributes.position`属性
+
+// 缓冲类型几何体BufferGeometry
+// threejs的长方体BoxGeometry、球体SphereGeometry等几何体都是基于BufferGeometry 类构建的，
+// BufferGeometry是一个没有任何形状的空几何体，你可以通过BufferGeometry自定义任何几何形状，具体一点说就是定义顶点数据。
+
+// 把数组 pointsArr 里的坐标数据取出来，给 geometry.attributes.position 赋值
 geometry.setFromPoints(pointsArr);
 
 // 点材质
-const material = new THREE.PointsMaterial({
-    color: 0xffff00,
-    size: 2.0 //点对象像素尺寸
-});
+// const material = new THREE.PointsMaterial({
+//     color: 0xffff00,
+//     size: 1 //点对象像素尺寸
+// });
 
 // 点模型
-const points = new THREE.Points(geometry, material);
+// const points = new THREE.Points(geometry, material);
 
-export default points;
+// 线材质
+const material = new THREE.LineBasicMaterial({
+    color: 0x00fffff
+});
+// 线模型
+const line = new THREE.Line(geometry, material);
+
+export default line;
