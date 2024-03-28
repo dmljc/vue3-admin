@@ -15,7 +15,7 @@ geometry.setFromPoints(pointsArr);
 // 创建线材质
 const material = new THREE.LineBasicMaterial({
     color: 0x0000ff,
-    side: 2,
+    side: 2
 });
 
 // 创建线模型
