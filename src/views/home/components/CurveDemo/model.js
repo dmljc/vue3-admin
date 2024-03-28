@@ -1,24 +1,32 @@
 import * as THREE from 'three';
 
-// 绘制椭圆弧线
-const arc = new THREE.EllipseCurve(0, 0, 20, 10, 0, Math.PI, false);
+// p1、p2、p3表示三个点坐标
+// p1、p3是曲线起始点，p2是曲线的控制点
+const p1 = new THREE.Vector2(-80, 0);
+const p2 = new THREE.Vector2(20, 100);
+const p3 = new THREE.Vector2(80, 0);
 
-// 获取椭圆上的顶点数据
-const pointsArr = arc.getPoints(50);
+// 二维二次贝赛尔曲线
+const curve = new THREE.QuadraticBezierCurve(p1, p2, p3);
 
-// 创建空材质对象
+// 获取曲线上的坐标点数量
+
+const pointArr = curve.getPoints(10);
+
 const geometry = new THREE.BufferGeometry();
 
-// 把椭圆上的顶点数据赋值给材质对象
-geometry.setFromPoints(pointsArr);
+geometry.setFromPoints(pointArr);
 
-// 创建线材质
 const material = new THREE.LineBasicMaterial({
-    color: 0x0000ff,
-    side: 2
+    color: 0x0000ff
 });
 
-// 创建线模型
-const ellipse = new THREE.Line(geometry, material);
+const model = new THREE.Line(geometry, material);
 
-export default ellipse;
+// const material = new THREE.PointsMaterial({
+//     color: 0xff00ff,
+//     size: 2,
+// })
+
+// const model = new THREE.Points(geometry, material)
+export default model;

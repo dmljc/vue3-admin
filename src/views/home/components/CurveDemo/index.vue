@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './splineCurve.js';
+import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const curve = ref(null);
@@ -15,12 +15,12 @@ const scene = new THREE.Scene();
 scene.add(model);
 
 // 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(20);
+const axesHelper = new THREE.AxesHelper(100);
 scene.add(axesHelper);
 
 // 灯光
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-directionalLight.position.set(50, 50, 50);
+directionalLight.position.set(100, 60, 50);
 scene.add(directionalLight);
 
 // 环境光
@@ -31,7 +31,7 @@ scene.add(ambientLight);
 const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
-camera.position.set(40.0, 40.0, 40.0);
+// camera.position.set(292, 223, 185);
 camera.lookAt(0, 0, 0);
 
 // 渲染器
