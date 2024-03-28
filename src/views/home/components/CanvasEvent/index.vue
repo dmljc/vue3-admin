@@ -5,7 +5,7 @@
         <div id="green" class="bu" @click="changeColor(0x00ff00)" style="margin-left: 10px">绿</div>
     </div>
 
-    <button id="download" @click="saveFile">下载</button>
+    <button id="download" @click="onDownload">下载</button>
 </template>
 
 <script setup lang="ts">
@@ -71,6 +71,16 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
 });
 
+const onDownload = () => {
+    // 创建一个超链接元素，用来下载保存数据的文件
+    const link = document.createElement('a');
+    const canvas = renderer.domElement; // 获取canvas对象
+    // 通过超链接herf属性，设置要保存到文件中的数据
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'threejs.png'; // 下载文件名
+    link.click(); // js代码触发超链接元素a的鼠标点击事件，开始下载文件到本地
+};
+
 onMounted(() => {
     // 设置 Canvas 背景颜色和官网demo一致。
     renderer.setClearColor(0x444544, 0.4);
@@ -86,13 +96,7 @@ onMounted(() => {
 
     // 鼠标单击id为download的HTML元素，threejs渲染结果以图片形式下载到本地
     document.getElementById('download').addEventListener('click', function () {
-        // 创建一个超链接元素，用来下载保存数据的文件
-        const link = document.createElement('a');
-        const canvas = renderer.domElement; //获取canvas对象
-        // 通过超链接herf属性，设置要保存到文件中的数据
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'threejs.png'; //下载文件名
-        link.click(); //js代码触发超链接元素a的鼠标点击事件，开始下载文件到本地
+        onDownload();
     });
 });
 

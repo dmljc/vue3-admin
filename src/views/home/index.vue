@@ -5,7 +5,8 @@
     <!-- <uv-texture /> -->
     <!-- <blender /> -->
     <!-- <PBRMaterial /> -->
-    <canvas-event />
+    <!-- <canvas-event /> -->
+    <curve-demo />
 </template>
 
 <script setup lang="ts">
@@ -15,5 +16,6 @@
 // import UvTexture from './components/UvTexture/index.vue';
 // import Blender from './components/Blender/index.vue';
 // import PBRMaterial from './components/PBRMaterial/index.vue';
-import CanvasEvent from './components/CanvasEvent/index.vue';
+// import CanvasEvent from './components/CanvasEvent/index.vue';
+import CurveDemo from './components/CurveDemo/index.vue';
 </script>
