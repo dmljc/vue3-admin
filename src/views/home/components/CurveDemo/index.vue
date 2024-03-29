@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model5.js';
+import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const curve = ref(null);
