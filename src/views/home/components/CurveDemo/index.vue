@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model.js';
+import model from './model5.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const curve = ref(null);
@@ -31,7 +31,7 @@ scene.add(ambientLight);
 const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
-// camera.position.set(292, 223, 185);
+camera.position.set(40, 122, 390);
 camera.lookAt(0, 0, 0);
 
 // 渲染器

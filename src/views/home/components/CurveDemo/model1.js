@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const geometry = new THREE.BufferGeometry();
 
 // 定义圆弧半径
-const R = 10;
+const R = 50;
 // 定义分段数量
 const N = 50;
 
@@ -14,8 +14,8 @@ const arr = [];
 const sp = (2 * Math.PI) / N;
 
 // 设置圆心坐标
-const cx = 5;
-const cy = 5;
+const cx = 50;
+const cy = 50;
 
 for (let i = 0; i < N + 1; i++) {
     const angle = sp * i;
@@ -34,10 +34,10 @@ geometry.attributes.position = attribue;
 
 // 线材质
 const material = new THREE.LineBasicMaterial({
-    color: 0xff0000
+    color: 0x00ffff
 });
 
 // 创建线模型对象 Line、LineLoop、LineSegments
-const line = new THREE.Line(geometry, material);
+const model = new THREE.Line(geometry, material);
 
-export default line;
+export default model;

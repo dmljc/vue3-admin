@@ -11,20 +11,20 @@ const curve = new THREE.QuadraticBezierCurve(p1, p2, p3);
 
 // 获取曲线上的坐标点数量
 
-const pointArr = curve.getPoints(10);
+const pointArr = curve.getPoints(50);
 
 const geometry = new THREE.BufferGeometry();
 
 geometry.setFromPoints(pointArr);
 
 const material = new THREE.LineBasicMaterial({
-    color: 0x0000ff
+    color: 0x00ffff
 });
 
 const model = new THREE.Line(geometry, material);
 
 // const material = new THREE.PointsMaterial({
-//     color: 0xff00ff,
+//     color: 0x00ffff,
 //     size: 2,
 // })
 
