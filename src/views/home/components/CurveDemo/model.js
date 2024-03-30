@@ -1,36 +1,56 @@
 import * as THREE from 'three';
 
-const R = 80; // 圆弧半径
-const H = 200; // 直线部分高度
-// 直线1
-const line1 = new THREE.LineCurve(new THREE.Vector2(R, H), new THREE.Vector2(R, 0));
-// 圆弧
-const arc = new THREE.ArcCurve(0, 0, R, 0, Math.PI, true);
-// 直线2
-const line2 = new THREE.LineCurve(new THREE.Vector2(-R, H), new THREE.Vector2(-R, 0));
+// 三维样条曲线
+// const path = new THREE.CatmullRomCurve3([
+//     new THREE.Vector3(-50, 20, 90),
+//     new THREE.Vector3(-10, 40, 40),
+//     new THREE.Vector3(0, 0, 0),
+//     new THREE.Vector3(60, -60, 0),
+//     new THREE.Vector3(70, 0, 80)
+// ]);
 
-// CurvePath创建一个组合曲线对象
+// LineCurve3 创建直线段路径
+// const path = new THREE.LineCurve3(new THREE.Vector3(0, 100, 0), new THREE.Vector3(0, 0, 0));
+
+// p1、p2、p3表示三个点坐标
+// const p1 = new THREE.Vector3(-80, 0, 0);
+// const p2 = new THREE.Vector3(20, 100, 0);
+// const p3 = new THREE.Vector3(80, 0, 100);
+
+// 三维二次贝赛尔曲线
+// const path = new THREE.QuadraticBezierCurve3(p1, p2, p3);
+
+// // path:路径，40：沿着轨迹细分数，2：管道半径，25：管道截面圆细分数
+// const geometry = new THREE.TubeGeometry(path, 40, 4, 25);
+// const material = new THREE.MeshLambertMaterial({
+//     color: 0x00ffff,
+//     side: THREE.DoubleSide,
+//     wireframe: true
+// });
+// const mesh = new THREE.Mesh(geometry, material);
+
+// 创建多段线条的顶点数据
+const p1 = new THREE.Vector3(0, 0, 100);
+const p2 = new THREE.Vector3(0, 0, 30);
+const p3 = new THREE.Vector3(0, 0, 0);
+const p4 = new THREE.Vector3(30, 0, 0);
+const p5 = new THREE.Vector3(100, 0, 0);
+
+// 3D直线线段1
+const line1 = new THREE.LineCurve3(p1, p2);
+// 三维二次贝塞尔曲线
+const curve = new THREE.QuadraticBezierCurve3(p2, p3, p4);
+// 3D直线线段2
+const line2 = new THREE.LineCurve3(p4, p5);
 const CurvePath = new THREE.CurvePath();
-// line1, arc, line2 拼接出来一个U型轮廓曲线，注意顺序
-CurvePath.curves.push(line1, arc, line2);
-// 获取曲线上的坐标点数量
-const pointArr = CurvePath.getPoints(10);
-const geometry = new THREE.BufferGeometry();
-geometry.setFromPoints(pointArr); //读取坐标数据赋值给几何体顶点
-const material = new THREE.LineBasicMaterial({
-    color: 0x00ffff
-});
-// 线模型
-const line = new THREE.Line(geometry, material);
+CurvePath.curves.push(line1, curve, line2);
 
-// 可视化 curve.getPoints 从曲线上获取的点坐标
-const materialPoints = new THREE.PointsMaterial({
-    color: 0xff0000,
-    size: 10
+const geometry = new THREE.TubeGeometry(CurvePath, 50, 4, 25);
+const material = new THREE.MeshBasicMaterial({
+    color: 0x00ffff,
+    side: THREE.DoubleSide,
+    wireframe: true
 });
-// 点模型
-const points = new THREE.Points(geometry, materialPoints);
+const mesh = new THREE.Mesh(geometry, material);
 
-const group = new THREE.Group();
-group.add(line, points);
-export default group;
+export default mesh;
