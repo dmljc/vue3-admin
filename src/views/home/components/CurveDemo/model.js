@@ -1,64 +1,36 @@
 import * as THREE from 'three';
 
-// p1、p3轨迹线起始点坐标
-// const p1 = new THREE.Vector3(-100, 0, -100);
-// const p3 = new THREE.Vector3(100, 0, 100);
+const R = 80; // 圆弧半径
+const H = 200; // 直线部分高度
+// 直线1
+const line1 = new THREE.LineCurve(new THREE.Vector2(R, H), new THREE.Vector2(R, 0));
+// 圆弧
+const arc = new THREE.ArcCurve(0, 0, R, 0, Math.PI, true);
+// 直线2
+const line2 = new THREE.LineCurve(new THREE.Vector2(-R, H), new THREE.Vector2(-R, 0));
 
-// // 计算p1和p3的中点坐标
-// const x2 = (p1.x + p3.x) / 2;
-
-// const z2 = (p1.z + p3.z) / 2;
-// const h = 50;
-// const p2 = new THREE.Vector3(x2, h, z2);
-
-// const arr = [p1, p2, p3];
-// // 三维样条曲线
-// const curve = new THREE.CatmullRomCurve3(arr);
-
-// p1、p3轨迹线起始点坐标
-const p1 = new THREE.Vector3(-100, 0, -100);
-const p3 = new THREE.Vector3(100, 0, 100);
-// 计算p1和p3的中点坐标
-const x2 = (p1.x + p3.x) / 2;
-const z2 = (p1.z + p3.z) / 2;
-// 三维样条曲线高度
-// const h = 50;
-// 三维二次贝赛尔曲线高度
-const h = 100;
-const p2 = new THREE.Vector3(x2, h, z2);
-
-const arr = [p1, p2, p3];
-// 三维样条曲线
-// const curve = new THREE.CatmullRomCurve3(arr);
-// 三维二次贝赛尔曲线
-const curve = new THREE.QuadraticBezierCurve3(...arr);
-
+// CurvePath创建一个组合曲线对象
+const CurvePath = new THREE.CurvePath();
+// line1, arc, line2 拼接出来一个U型轮廓曲线，注意顺序
+CurvePath.curves.push(line1, arc, line2);
 // 获取曲线上的坐标点数量
-const pointArr = curve.getPoints(50);
-
+const pointArr = CurvePath.getPoints(10);
 const geometry = new THREE.BufferGeometry();
-geometry.setFromPoints(pointArr);
-
+geometry.setFromPoints(pointArr); //读取坐标数据赋值给几何体顶点
 const material = new THREE.LineBasicMaterial({
     color: 0x00ffff
 });
-
+// 线模型
 const line = new THREE.Line(geometry, material);
 
-// 用点模型可视化贝塞尔曲线经过的顶点位置
-const geometryPoints = new THREE.BufferGeometry();
-geometryPoints.setFromPoints([p1, p2, p3]);
-
+// 可视化 curve.getPoints 从曲线上获取的点坐标
 const materialPoints = new THREE.PointsMaterial({
     color: 0xff0000,
     size: 10
 });
-
-const points = new THREE.Points(geometryPoints, materialPoints);
-
-// 三个点构成的线条
-const line2 = new THREE.Line(geometryPoints, new THREE.LineBasicMaterial());
+// 点模型
+const points = new THREE.Points(geometry, materialPoints);
 
 const group = new THREE.Group();
-group.add(line, points, line2);
+group.add(line, points);
 export default group;
