@@ -1,18 +1,26 @@
 import * as THREE from 'three';
 
-// Vector2 表示的三个点坐标
-const pointsArr = [new THREE.Vector2(50, 60), new THREE.Vector2(25, 0), new THREE.Vector2(50, -60)];
-// 通过三点定一个二维样条曲线
-const curves = new THREE.SplineCurve(pointsArr);
-// 曲线上获取点，作为旋转几何体的旋转轮廓
-const points = curves.getPoints(50);
+// 一组二维向量表示一个多边形轮廓坐标
+const pointsArr = [
+    new THREE.Vector2(-50, -50),
+    new THREE.Vector2(-60, 0),
+    new THREE.Vector2(0, 50),
+    new THREE.Vector2(60, 0),
+    new THREE.Vector2(50, -50)
+];
 
-// pointsArr 轮廓绕y轴旋转生成几何体曲面
-const geometry = new THREE.LatheGeometry(points, 30);
+// Shape表示一个平面多边形轮廓，参数是二维向量构成的数组pointsArr
+const shape = new THREE.Shape(pointsArr);
+
+// 把五边形轮廓Shape作为ShapeGeometry的参数，形成一个多边形平面几何体。
+const geometry = new THREE.ShapeGeometry(shape);
+
 const material = new THREE.MeshLambertMaterial({
     color: 0x00ffff,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    wireframe: true // 将几何体渲染为线框。默认值为false（即渲染为平面多边形）。
 });
 
 const mesh = new THREE.Mesh(geometry, material);
+
 export default mesh;
