@@ -15,7 +15,7 @@ const scene = new THREE.Scene();
 scene.add(model);
 
 // 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(100);
+const axesHelper = new THREE.AxesHelper(200);
 scene.add(axesHelper);
 
 // 灯光

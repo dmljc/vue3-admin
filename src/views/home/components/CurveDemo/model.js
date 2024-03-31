@@ -1,26 +1,29 @@
 import * as THREE from 'three';
 
-// 一组二维向量表示一个多边形轮廓坐标
-const pointsArr = [
-    new THREE.Vector2(-50, -50),
-    new THREE.Vector2(-60, 0),
-    new THREE.Vector2(0, 50),
-    new THREE.Vector2(60, 0),
+const pointArr = [
+    // 按照特定顺序，依次书写多边形顶点坐标
+    new THREE.Vector2(-50, -50), //多边形起点
+    new THREE.Vector2(-50, 50),
+    new THREE.Vector2(50, 50),
     new THREE.Vector2(50, -50)
 ];
 
-// Shape表示一个平面多边形轮廓，参数是二维向量构成的数组pointsArr
-const shape = new THREE.Shape(pointsArr);
+const shape = new THREE.Shape(pointArr);
 
-// 把五边形轮廓Shape作为ShapeGeometry的参数，形成一个多边形平面几何体。
-const geometry = new THREE.ShapeGeometry(shape);
-
-const material = new THREE.MeshLambertMaterial({
-    color: 0x00ffff,
-    side: THREE.DoubleSide,
-    wireframe: true // 将几何体渲染为线框。默认值为false（即渲染为平面多边形）。
+const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 160,
+    bevelThickness: 40, // 倒角尺寸:拉伸方向
+    bevelSize: 20, // 倒角尺寸:垂直拉伸方向
+    bevelSegments: 20, // 倒圆角：倒角细分精度，默认3
+    // bevelSegments: 1, // 倒直角
+    bevelEnabled: false //禁止倒角,默认true
 });
 
-const mesh = new THREE.Mesh(geometry, material);
+const materal = new THREE.MeshLambertMaterial({
+    color: 0x00ffff
+    // wireframe: true,
+});
+
+const mesh = new THREE.Mesh(geometry, materal);
 
 export default mesh;
