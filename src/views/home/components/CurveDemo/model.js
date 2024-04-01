@@ -12,7 +12,7 @@ shape.lineTo(10, 100);
 
 // ExtrudeGeometry 拉伸 Shape 获得一个长方体几何体
 const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth: 40, //拉伸长度
+    depth: 40 //拉伸长度
 });
 const materal = new THREE.MeshLambertMaterial({
     color: 0x00ffff
