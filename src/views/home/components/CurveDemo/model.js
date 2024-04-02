@@ -1,54 +1,42 @@
-// import * as THREE from 'three';
-
-// // 创建一个立方体网格模型
-// // const geometry = new THREE.BoxGeometry(50, 50, 50);
-
-// const geometry = new THREE.CylinderGeometry(60, 60, 100, 30);
-// const material = new THREE.MeshLambertMaterial({
-//     color: 0x004444,
-//     // transparent: true,
-//     // opacity: 0.6
-// });
-// const mesh = new THREE.Mesh(geometry, material);
-
-// // 长方体几何体作为 EdgesGeometry 参数创建一个新的几何体
-// const edges = new THREE.EdgesGeometry(geometry, 30);
-// const edgesMaterial = new THREE.LineBasicMaterial({
-//     color: 0x00ffff
-// });
-
-// // 在顶点之间绘制一条线
-// const line = new THREE.LineSegments(edges, edgesMaterial);
-// mesh.add(line);
-
-// export default mesh;
-
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// 创建一个GLTF加载器
-const loader = new GLTFLoader();
-const group = new THREE.Group();
+// 创建一个几何体对象
+const geometry = new THREE.BufferGeometry();
+// 类型数组创建顶点数据
+const vertices = new Float32Array([
+    0, 0, 0, // 顶点1坐标
+    50, 0, 0, // 顶点2坐标
+    0, 25, 0, // 顶点3坐标
+]);
+// 创建属性缓冲区对象
+// 3个为一组，表示一个顶点的xyz坐标
+const attribue = new THREE.BufferAttribute(vertices, 3);
+// 设置几何体 attributes 属性的位置属性
+geometry.attributes.position = attribue;
 
-loader.load('/建筑模型.gltf', (gltf) => {
-    // 递归遍历设置每个模型的材质，同时设置每个模型的边线
-    gltf.scene.traverse((obj) => {
-        if (obj.isMesh) {
-            obj.material = new THREE.MeshLambertMaterial({
-                color: 0x004444,
-                transparent: true,
-                opacity: 0.6
-            });
-            const edges = new THREE.EdgesGeometry(obj.geometry);
-            const edgesMaterial = new THREE.LineBasicMaterial({
-                color: 0x00ffff
-            });
+// 类型数组创建顶点颜色color数据
+const colors = new Float32Array([
+    1, 0, 0, // 顶点1颜色
+    0, 0, 1, // 顶点2颜色
+    0, 1, 0, // 顶点3颜色
+]);
+// 3个为一组，表示一个顶点的颜色数据RGB
+const color = new THREE.BufferAttribute(colors, 3);
+// 设置几何体attributes属性的颜色color属性
+geometry.attributes.color = color;
 
-            const line = new THREE.LineSegments(edges, edgesMaterial);
-            obj.add(line);
-        }
-    });
-    group.add(gltf.scene);
+// 点渲染模式
+const material = new THREE.PointsMaterial({
+    // color: 0x00fff, // 使用顶点颜色数据，color属性可以不用设置
+    vertexColors: true, // 默认false，设置为true表示使用顶点颜色渲染
+    size: 20.0 // 点对象像素尺寸
 });
-
-export default group;
+// 点模型对象
+// const points = new THREE.Points(geometry, material);
+// 线模型对象
+// const mesh = new THREE.Line(geometry, material);
+// 网格模型对象
+const mesh = new THREE.Mesh(geometry, material);
+mesh.translateX(10);
+mesh.translateY(10);
+export default mesh;
