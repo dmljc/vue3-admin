@@ -1,41 +1,54 @@
+// import * as THREE from 'three';
+
+// // 创建一个立方体网格模型
+// // const geometry = new THREE.BoxGeometry(50, 50, 50);
+
+// const geometry = new THREE.CylinderGeometry(60, 60, 100, 30);
+// const material = new THREE.MeshLambertMaterial({
+//     color: 0x004444,
+//     // transparent: true,
+//     // opacity: 0.6
+// });
+// const mesh = new THREE.Mesh(geometry, material);
+
+// // 长方体几何体作为 EdgesGeometry 参数创建一个新的几何体
+// const edges = new THREE.EdgesGeometry(geometry, 30);
+// const edgesMaterial = new THREE.LineBasicMaterial({
+//     color: 0x00ffff
+// });
+
+// // 在顶点之间绘制一条线
+// const line = new THREE.LineSegments(edges, edgesMaterial);
+// mesh.add(line);
+
+// export default mesh;
+
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// 先创建Shape的矩形外轮廓
-const shape = new THREE.Shape();
-shape.lineTo(100, 0);
-shape.lineTo(100, 100);
-shape.lineTo(0, 100);
+// 创建一个GLTF加载器
+const loader = new GLTFLoader();
+const group = new THREE.Group();
 
-// Path对象创建内部多个轮廓
+loader.load('/建筑模型.gltf', (gltf) => {
+    // 递归遍历设置每个模型的材质，同时设置每个模型的边线
+    gltf.scene.traverse((obj) => {
+        if (obj.isMesh) {
+            obj.material = new THREE.MeshLambertMaterial({
+                color: 0x004444,
+                transparent: true,
+                opacity: 0.6
+            });
+            const edges = new THREE.EdgesGeometry(obj.geometry);
+            const edgesMaterial = new THREE.LineBasicMaterial({
+                color: 0x00ffff
+            });
 
-// 圆孔1
-const path1 = new THREE.Path();
-path1.absarc(20, 20, 10);
-// 圆孔2
-const path2 = new THREE.Path();
-path2.absarc(80, 20, 10);
-// 方孔
-const path3 = new THREE.Path();
-path3.moveTo(50, 50);
-path3.lineTo(80, 50);
-path3.lineTo(80, 80);
-path3.lineTo(50, 80);
-
-// 三个内孔轮廓分别插入到holes属性中
-shape.holes.push(path1, path2, path3);
-
-// ShapeGeometry 填充 Shape 获得一个平面几何体
-// const geometry = new THREE.ShapeGeometry(shape);
-
-// ExtrudeGeometry 拉伸 Shape 获得一个长方体几何体
-const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth: 60, // 拉伸长度
-    bevelEnabled: false, // 禁止倒角
-    curveSegments: 50 // shape曲线对应曲线细分数，光滑度系数
+            const line = new THREE.LineSegments(edges, edgesMaterial);
+            obj.add(line);
+        }
+    });
+    group.add(gltf.scene);
 });
-const material = new THREE.MeshLambertMaterial({
-    color: 0x00ffff
-});
-const mesh = new THREE.Mesh(geometry, material);
 
-export default mesh;
+export default group;
