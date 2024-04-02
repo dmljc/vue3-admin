@@ -57,7 +57,7 @@ window.addEventListener('resize', () => {
 });
 
 onMounted(() => {
-    renderer.setClearColor(0x444544, 0.4);
+    // renderer.setClearColor(0x444544, 0.4);
     curve.value.appendChild(renderer.domElement);
 });
 
