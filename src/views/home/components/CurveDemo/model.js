@@ -2,41 +2,40 @@ import * as THREE from 'three';
 
 // 创建一个几何体对象
 const geometry = new THREE.BufferGeometry();
-// 类型数组创建顶点数据
-const vertices = new Float32Array([
-    0, 0, 0, // 顶点1坐标
-    50, 0, 0, // 顶点2坐标
-    0, 25, 0, // 顶点3坐标
+// 三维样条曲线
+const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-50, 20, 90),
+    new THREE.Vector3(-10, 40, 40),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(60, -60, 0),
+    new THREE.Vector3(70, 0, 80)
 ]);
-// 创建属性缓冲区对象
-// 3个为一组，表示一个顶点的xyz坐标
-const attribue = new THREE.BufferAttribute(vertices, 3);
-// 设置几何体 attributes 属性的位置属性
-geometry.attributes.position = attribue;
+// 曲线取点
+const pointsArr = curve.getSpacedPoints(100);
+// pointsArr赋值给顶点位置属性
+geometry.setFromPoints(pointsArr);
+
+const pos = geometry.attributes.position;
+const count = pos.count; // 顶点数量
+// 计算每个顶点的颜色值
+const colorsArr = [];
+for (let i = 0; i < count; i++) {
+    const percent = i / count; // 点索引值相对所有点数量的百分比
+    // 根据顶点位置顺序大小设置颜色渐变
+    // 红色分量从0到1变化，蓝色分量从1到0变化
+    colorsArr.push(percent, 0, 1 - percent); // 蓝色到红色渐变色
+}
 
 // 类型数组创建顶点颜色color数据
-const colors = new Float32Array([
-    1, 0, 0, // 顶点1颜色
-    0, 0, 1, // 顶点2颜色
-    0, 1, 0, // 顶点3颜色
-]);
-// 3个为一组，表示一个顶点的颜色数据RGB
-const color = new THREE.BufferAttribute(colors, 3);
-// 设置几何体attributes属性的颜色color属性
-geometry.attributes.color = color;
+const colors = new Float32Array(colorsArr);
 
-// 点渲染模式
-const material = new THREE.PointsMaterial({
-    // color: 0x00fff, // 使用顶点颜色数据，color属性可以不用设置
-    vertexColors: true, // 默认false，设置为true表示使用顶点颜色渲染
-    size: 20.0 // 点对象像素尺寸
+// 设置几何体attributes属性的颜色color属性
+geometry.attributes.color = new THREE.BufferAttribute(colors, 3);
+
+// 线模型渲染几何体顶点颜色，可以看到直线颜色渐变效果
+const material = new THREE.LineBasicMaterial({
+    vertexColors: true // 默认false，设置为true表示使用顶点颜色渲染
 });
-// 点模型对象
-// const points = new THREE.Points(geometry, material);
-// 线模型对象
-// const mesh = new THREE.Line(geometry, material);
-// 网格模型对象
-const mesh = new THREE.Mesh(geometry, material);
-mesh.translateX(10);
-mesh.translateY(10);
-export default mesh;
+const line = new THREE.Line(geometry, material);
+
+export default line;
