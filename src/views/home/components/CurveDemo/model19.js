@@ -15,26 +15,15 @@ const pointsArr = curve.getSpacedPoints(100);
 // pointsArr赋值给顶点位置属性
 geometry.setFromPoints(pointsArr);
 
-// const c1 = new THREE.Color(0xff0000); // 红色 (1,0,0)
-// const c2 = new THREE.Color(0x0000ff); // 蓝色 (0,0,1)
-// const c = new THREE.Color(); // 白色
-
-// c.lerpColors(c1, c2, 0);
-// c1与c2颜色混合，混合后的rgb值，赋值给c1的.r、.g、.b属性。
-// c1.lerp(c2, 0);
-// console.log('颜色插值结果', c1); (1,0,0)
-// c1.lerp(c2, 1); // 0 ,0, 1
-// c1.lerp(c2, 0.5); // 0.5 ,0 ,0.5
-// console.log('颜色插值结果', c1); 
-
-// 根据顶点距离起点远近进行颜色插值计算
-const c1 = new THREE.Color(0x00ffff); //曲线起点颜色 青色
-const c2 = new THREE.Color(0xffff00); //曲线结束点颜色 黄色
+const pos = geometry.attributes.position;
+const count = pos.count; // 顶点数量
+// 计算每个顶点的颜色值
+const colorsArr = [];
 for (let i = 0; i < count; i++) {
-    const percent = i / count; //点索引值相对所有点数量的百分比
-    //根据顶点位置顺序大小设置颜色渐变
-    const c = c1.clone().lerp(c2, percent);//颜色插值计算
-    colorsArr.push(c.r, c.g, c.b); 
+    const percent = i / count; // 点索引值相对所有点数量的百分比
+    // 根据顶点位置顺序大小设置颜色渐变
+    // 红色分量从0到1变化，蓝色分量从1到0变化
+    colorsArr.push(percent, 0, 1 - percent); // 蓝色到红色渐变色
 }
 
 // 类型数组创建顶点颜色color数据
