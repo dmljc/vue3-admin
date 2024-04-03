@@ -25,7 +25,7 @@ geometry.setFromPoints(pointsArr);
 // console.log('颜色插值结果', c1); (1,0,0)
 // c1.lerp(c2, 1); // 0 ,0, 1
 // c1.lerp(c2, 0.5); // 0.5 ,0 ,0.5
-// console.log('颜色插值结果', c1); 
+// console.log('颜色插值结果', c1);
 
 // 根据顶点距离起点远近进行颜色插值计算
 const c1 = new THREE.Color(0x00ffff); //曲线起点颜色 青色
@@ -33,8 +33,8 @@ const c2 = new THREE.Color(0xffff00); //曲线结束点颜色 黄色
 for (let i = 0; i < count; i++) {
     const percent = i / count; //点索引值相对所有点数量的百分比
     //根据顶点位置顺序大小设置颜色渐变
-    const c = c1.clone().lerp(c2, percent);//颜色插值计算
-    colorsArr.push(c.r, c.g, c.b); 
+    const c = c1.clone().lerp(c2, percent); //颜色插值计算
+    colorsArr.push(c.r, c.g, c.b);
 }
 
 // 类型数组创建顶点颜色color数据
