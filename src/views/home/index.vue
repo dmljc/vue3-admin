@@ -6,7 +6,8 @@
     <!-- <blender /> -->
     <!-- <PBRMaterial /> -->
     <!-- <canvas-event /> -->
-    <curve-demo />
+    <!-- <curve-demo /> -->
+    <camera-demo />
 </template>
 
 <script setup lang="ts">
@@ -17,5 +18,6 @@
 // import Blender from './components/Blender/index.vue';
 // import PBRMaterial from './components/PBRMaterial/index.vue';
 // import CanvasEvent from './components/CanvasEvent/index.vue';
-import CurveDemo from './components/CurveDemo/index.vue';
+// import CurveDemo from './components/CurveDemo/index.vue';
+import CameraDemo from './components/CameraDemo/index.vue';
 </script>
