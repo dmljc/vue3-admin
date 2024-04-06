@@ -1,10 +1,10 @@
 <template>
     <div ref="curve"></div>
-    <!-- <div class="pos">
+    <div class="pos">
         <div id="x" class="bu">x</div>
         <div id="y" class="bu" style="margin-left: 10px">y</div>
         <div id="z" class="bu" style="margin-left: 10px">z</div>
-    </div> -->
+    </div>
 </template>
 
 <script setup lang="ts">
