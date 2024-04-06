@@ -1,23 +1,24 @@
 <template>
     <div ref="curve"></div>
-    <div class="pos">
+    <!-- <div class="pos">
         <div id="x" class="bu">x</div>
         <div id="y" class="bu" style="margin-left: 10px">y</div>
         <div id="z" class="bu" style="margin-left: 10px">z</div>
-    </div>
+    </div> -->
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model.js';
+// import model from './model.js';
+import { mesh, pointsArr } from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const curve = ref(null);
 // 场景
 const scene = new THREE.Scene();
 
-scene.add(model);
+scene.add(mesh);
 
 // 辅助观察坐标系
 const axesHelper = new THREE.AxesHelper(200);
@@ -38,9 +39,9 @@ const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
 camera.position.set(40, 122, 390);
 
-console.log('.up默认值', camera.up);
+// console.log('.up默认值', camera.up);
 // 你可以看到模型相比原来上下颠倒  y坐标轴朝下
-camera.up.set(0, -1, 0);
+// camera.up.set(0, -1, 0);
 
 camera.lookAt(0, 0, 0);
 
@@ -63,8 +64,19 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(width, height);
 
+const i = 100;
+// 相机位置设置在当前点位置
+camera.position.copy(pointsArr[i]);
+// 曲线上当前点pointsArr[i]和下一个点pointsArr[i+1]近似模拟当前点曲线切线
+// 设置相机观察点为当前点的下一个点，相机视线和当前点曲线切线重合
+camera.lookAt(pointsArr[i + 1]);
+
 // 相机轨道控制器
 const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(pointsArr[i + 1]);
+controls.update();
+
 // controls.target.set(x, y, 0); // 与lookAt参数保持一致
 // controls.update(); // update()函数内会执行camera.lookAt(controls.target)
 
@@ -113,6 +125,9 @@ onUnmounted(() => {
 // 渲染循环
 // let angle = 0;
 // let R = 100;
+
+let _i = 0;
+
 const render = () => {
     // 相机圆周运动
     // angle += 0.01;
@@ -121,7 +136,18 @@ const render = () => {
     // 相机直线运动动画
     // camera.position.z -= 0.2;
 
-    camera.lookAt(0, 0, 0);
+    if (_i < pointsArr.length - 1) {
+        // 相机位置设置在当前点位置
+        camera.position.copy(pointsArr[_i]);
+        // 曲线上当前点pointsArr[i]和下一个点pointsArr[i+1]近似模拟当前点曲线切线
+        // 设置相机观察点为当前点的下一个点，相机视线和当前点曲线切线重合
+        camera.lookAt(pointsArr[_i + 1]);
+        _i += 1; // 调节速度
+    } else {
+        _i = 0;
+    }
+
+    // camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
     requestAnimationFrame(render);
 };
