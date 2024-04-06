@@ -1,12 +1,24 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-const loader = new GLTFLoader();
-
-const model = new THREE.Group();
-
-loader.load('/工厂建模数据/工厂.gltf', (gltf) => {
-    model.add(gltf.scene);
+const geometry = new THREE.BoxGeometry(100, 50, 20);
+const material = new THREE.MeshLambertMaterial({
+    color: 0x00ffff
 });
+const mesh = new THREE.Mesh(geometry, material);
 
-export default model;
+// 计算模型包围盒
+const box3 = new THREE.Box3();
+box3.expandByObject(mesh);
+console.log('查看包围盒', box3);
+
+// 计算包围盒尺寸
+const size = new THREE.Vector3();
+box3.getSize(size);
+console.log('模型包围盒尺寸', size);
+
+// 计算包围盒中心坐标
+const center = new THREE.Vector3();
+box3.getCenter(center);
+console.log('模型中心坐标', center);
+
+export default mesh;

@@ -1,5 +1,10 @@
 <template>
     <div ref="curve"></div>
+    <div class="pos">
+        <div id="x" class="bu">x</div>
+        <div id="y" class="bu" style="margin-left: 10px">y</div>
+        <div id="z" class="bu" style="margin-left: 10px">z</div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -32,6 +37,11 @@ const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
 camera.position.set(40, 122, 390);
+
+console.log('.up默认值', camera.up);
+// 你可以看到模型相比原来上下颠倒  y坐标轴朝下
+camera.up.set(0, -1, 0);
+
 camera.lookAt(0, 0, 0);
 
 // 正投影相机
@@ -81,6 +91,19 @@ window.addEventListener('resize', () => {
 onMounted(() => {
     // renderer.setClearColor(0x444544, 0.4);
     curve.value.appendChild(renderer.domElement);
+    // 通过UI按钮改变相机观察角度
+    document.getElementById('x').addEventListener('click', () => {
+        camera.position.set(500, 0, 0); //x轴方向观察
+        camera.lookAt(0, 0, 0); //重新计算相机视线方向
+    });
+    document.getElementById('y').addEventListener('click', () => {
+        camera.position.set(0, 500, 0); //y轴方向观察
+        camera.lookAt(0, 0, 0); //重新计算相机视线方向
+    });
+    document.getElementById('z').addEventListener('click', () => {
+        camera.position.set(0, 0, 500); //z轴方向观察
+        camera.lookAt(0, 0, 0); //重新计算相机视线方向
+    });
 });
 
 onUnmounted(() => {
@@ -88,13 +111,13 @@ onUnmounted(() => {
 });
 
 // 渲染循环
-let angle = 0;
-let R = 100;
+// let angle = 0;
+// let R = 100;
 const render = () => {
     // 相机圆周运动
-    angle += 0.01;
-    camera.position.x = R * Math.cos(angle);
-    camera.position.z = R * Math.sin(angle);
+    // angle += 0.01;
+    // camera.position.x = R * Math.cos(angle);
+    // camera.position.z = R * Math.sin(angle);
     // 相机直线运动动画
     // camera.position.z -= 0.2;
 
@@ -104,3 +127,27 @@ const render = () => {
 };
 render();
 </script>
+
+<style scoped>
+.bu {
+    background: rgba(255, 255, 255, 0.1);
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    color: #fff;
+    display: inline-block;
+    border-radius: 30px;
+}
+
+.bu:hover {
+    cursor: pointer;
+}
+
+.pos {
+    position: absolute;
+    left: 50%;
+    /* margin-left: -100px; */
+    bottom: 100px;
+}
+</style>
