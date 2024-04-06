@@ -7,7 +7,8 @@
     <!-- <PBRMaterial /> -->
     <!-- <canvas-event /> -->
     <!-- <curve-demo /> -->
-    <camera-demo />
+    <!-- <camera-demo /> -->
+    <orbit-controls />
 </template>
 
 <script setup lang="ts">
@@ -19,5 +20,6 @@
 // import PBRMaterial from './components/PBRMaterial/index.vue';
 // import CanvasEvent from './components/CanvasEvent/index.vue';
 // import CurveDemo from './components/CurveDemo/index.vue';
-import CameraDemo from './components/CameraDemo/index.vue';
+// import CameraDemo from './components/CameraDemo/index.vue';
+import OrbitControls from './components/OrbitControls/index.vue';
 </script>
