@@ -26,18 +26,19 @@ scene.add(directionalLight);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
+// 聚光源
 const spotLight = new THREE.SpotLight(0xffffff, 1.0);
 scene.add(spotLight);
-spotLight.angle = Math.PI / 6;
-spotLight.decay = 0.0;
-spotLight.position.set(0, 50, 0);
+spotLight.angle = Math.PI / 6; // 发散角度
+spotLight.decay = 0.0; // 光源不衰减
+spotLight.position.set(0, 50, 0); // 聚光源位置
 const spotLightHelper = new THREE.SpotLightHelper(spotLight, 0xff0000);
 scene.add(spotLightHelper);
 
 // spotLight.target是一个模型对象Object3D，默认在坐标原点
-spotLight.target.position.set(50, 0, 0);
+spotLight.target.position.set(50, 0, 0); // 聚光源目标对象
 //spotLight.target添加到场景中.target.position才会起作用
-scene.add(spotLight.target);
+scene.add(spotLight.target); // 添加到场景中
 
 // 相机
 const width = window.innerWidth - 296;
