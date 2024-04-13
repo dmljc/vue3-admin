@@ -14,43 +14,63 @@ const scene = new THREE.Scene();
 scene.add(model);
 
 // 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(200);
+const axesHelper = new THREE.AxesHelper(100);
 scene.add(axesHelper);
-
-// 灯光
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-directionalLight.position.set(100, 60, 50);
-scene.add(directionalLight);
 
 // 环境光
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
-const spotLight = new THREE.SpotLight(0xffffff, 1.0);
-scene.add(spotLight);
-spotLight.angle = Math.PI / 6;
-spotLight.decay = 0.0;
-spotLight.position.set(0, 50, 0);
-const spotLightHelper = new THREE.SpotLightHelper(spotLight, 0xff0000);
-scene.add(spotLightHelper);
+// 平行光
+const directionalLight = new THREE.DirectionalLight(0xffffff, 4);
+directionalLight.position.set(100, 60, 50);
+scene.add(directionalLight);
+
+// 2、平行光设置产生阴影的光源对象，开启光源阴影的计算功能
+directionalLight.castShadow = true;
+
+// 5、设置三维场景计算阴影的范围
+directionalLight.shadow.camera.left = -50;
+directionalLight.shadow.camera.right = 50;
+directionalLight.shadow.camera.top = 200;
+directionalLight.shadow.camera.bottom = -100;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 400;
+
+// 可视化平行光阴影对应的正投影相机对象
+const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+scene.add(cameraHelper);
+
+// const spotLight = new THREE.SpotLight(0xffffff, 1.0);
+// scene.add(spotLight);
+// spotLight.angle = Math.PI / 6;
+// spotLight.decay = 0.0;
+// spotLight.position.set(0, 50, 0);
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight, 0xff0000);
+// scene.add(spotLightHelper);
 
 // spotLight.target是一个模型对象Object3D，默认在坐标原点
-spotLight.target.position.set(50, 0, 0);
+// spotLight.target.position.set(50, 0, 0);
 //spotLight.target添加到场景中.target.position才会起作用
-scene.add(spotLight.target);
+// scene.add(spotLight.target);
 
 // 相机
 const width = window.innerWidth - 296;
 const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
-camera.position.set(40, 122, 390);
+// camera.position.set(40, 122, 390);
+camera.position.set(153, 697, 676);
 camera.lookAt(0, 0, 0);
 
-// 渲染器
+// webgl 渲染器
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 renderer.setSize(width, height);
+// 防止输出模糊
+renderer.setPixelRatio(window.devicePixelRatio); 
+// 4、设置渲染器，允许光源阴影渲染
+renderer.shadowMap.enabled = true;
 
 // 相机轨道控制器
 const controls = new OrbitControls(camera, renderer.domElement);
