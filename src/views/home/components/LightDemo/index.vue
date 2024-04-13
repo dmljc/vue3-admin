@@ -68,7 +68,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(width, height);
 // 防止输出模糊
-renderer.setPixelRatio(window.devicePixelRatio); 
+renderer.setPixelRatio(window.devicePixelRatio);
 // 4、设置渲染器，允许光源阴影渲染
 renderer.shadowMap.enabled = true;
 
