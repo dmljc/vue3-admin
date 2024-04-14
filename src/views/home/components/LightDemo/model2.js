@@ -12,7 +12,7 @@ mesh.position.y = 50;
 mesh.castShadow = true;
 
 // 平面
-const planeGeometry = new THREE.PlaneGeometry(400, 850);
+const planeGeometry = new THREE.PlaneGeometry(400, 250);
 const planeMaterial = new THREE.MeshLambertMaterial({
     color: 0x999999,
     side: THREE.DoubleSide
@@ -24,13 +24,5 @@ planeMesh.receiveShadow = true;
 
 const group = new THREE.Group();
 group.add(mesh, planeMesh);
-
-for (let i = -3; i < 4; i++) {
-    const mesh2 = mesh.clone();
-    // 设置产生投影的网格模型
-    mesh2.castShadow = true;
-    mesh.position.z = i * 100;
-    group.add(mesh2);
-}
 
 export default group;

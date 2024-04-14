@@ -14,7 +14,7 @@ const scene = new THREE.Scene();
 scene.add(model);
 
 // 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(100);
+const axesHelper = new THREE.AxesHelper(500);
 scene.add(axesHelper);
 
 // 环境光
@@ -23,19 +23,19 @@ scene.add(ambientLight);
 
 // 平行光
 const directionalLight = new THREE.DirectionalLight(0xffffff, 4);
-directionalLight.position.set(100, 60, 50);
+directionalLight.position.set(200, 160, 150);
 scene.add(directionalLight);
 
 // 2、平行光设置产生阴影的光源对象，开启光源阴影的计算功能
 directionalLight.castShadow = true;
 
 // 5、设置三维场景计算阴影的范围
-directionalLight.shadow.camera.left = -50;
-directionalLight.shadow.camera.right = 50;
-directionalLight.shadow.camera.top = 200;
-directionalLight.shadow.camera.bottom = -100;
+directionalLight.shadow.camera.left = -50 * 6;
+directionalLight.shadow.camera.right = 50 * 6;
+directionalLight.shadow.camera.top = 200 * 2;
+directionalLight.shadow.camera.bottom = -100 * 2;
 directionalLight.shadow.camera.near = 0.5;
-directionalLight.shadow.camera.far = 400;
+directionalLight.shadow.camera.far = 400 * 10;
 
 // 可视化平行光阴影对应的正投影相机对象
 const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
