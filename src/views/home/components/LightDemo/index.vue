@@ -26,6 +26,15 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 4);
 directionalLight.position.set(200, 160, 150);
 scene.add(directionalLight);
 
+// mapSize属性默认 512x512
+console.log('阴影默认像素', directionalLight.shadow.mapSize);
+// directionalLight.shadow.mapSize.set(128, 128);
+directionalLight.shadow.mapSize.set(1024, 1024);
+
+// 模糊弱化阴影边缘
+console.log('.shadow.radius', directionalLight.shadow.radius); // 1
+directionalLight.shadow.radius = 5;
+
 // 2、平行光设置产生阴影的光源对象，开启光源阴影的计算功能
 directionalLight.castShadow = true;
 
