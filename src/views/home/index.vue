@@ -25,5 +25,5 @@
 // import CameraDemo from './components/CameraDemo/index.vue';
 // import OrbitControls from './components/OrbitControls/index.vue';
 // import LightDemo from './components/LightDemo/index.vue';
-import SpriteDemo from './components/SpriteDemo/index.vue'
+import SpriteDemo from './components/SpriteDemo/index.vue';
 </script>

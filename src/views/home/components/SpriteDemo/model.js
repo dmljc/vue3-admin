@@ -13,7 +13,7 @@ group.add(mesh);
 // 创建精灵
 const texture = new THREE.TextureLoader().load('./光点.png');
 const spriteMaterial = new THREE.SpriteMaterial({
-    map: texture, // 设置精灵纹理贴图
+    map: texture // 设置精灵纹理贴图
     // transparent: true 默认true
 });
 const sprite = new THREE.Sprite(spriteMaterial);
