@@ -1,26 +1,61 @@
 import * as THREE from 'three';
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-// mesh顶部中心添加标注，顶部中心坐标是(0,100,0)
-const geometry = new THREE.BoxGeometry(25, 100, 50);
-geometry.translate(0, 50, 0);
-const material = new THREE.MeshLambertMaterial({
-    color: 0x00ffff
+const loader = new GLTFLoader();
+const model = new THREE.Group();
+
+loader.load('/工厂建模数据/工厂.glb', (gltf) => {
+    model.add(gltf.scene);
 });
-const mesh = new THREE.Mesh(geometry, material);
-const group = new THREE.Group();
-group.add(mesh);
 
-// 创建精灵
-const texture = new THREE.TextureLoader().load('./光点.png');
+const texture = new THREE.TextureLoader().load('/雪花.png');
 const spriteMaterial = new THREE.SpriteMaterial({
-    map: texture // 设置精灵纹理贴图
-    // transparent: true 默认true
+    map: texture
 });
-const sprite = new THREE.Sprite(spriteMaterial);
-// 控制精灵大小
-sprite.scale.set(10, 10, 1);
-// 设置精灵模型在三维空间中的位置坐标
-sprite.position.set(0, 100 + 10 / 2, 0);
-group.add(sprite);
 
-export default group;
+// 批量创建多个精灵模型，在一个长方体空间上随机分布
+const group = new THREE.Group();
+model.add(group);
+
+for (let i = 0; i < 16000; i++) {
+    // 精灵模型共享材质
+    const sprite = new THREE.Sprite(spriteMaterial);
+    group.add(sprite);
+    sprite.scale.set(1, 1, 1);
+    // 设置精灵模型位置，在长方体空间上上随机分布
+    const x = 1000 * (Math.random() - 0.5);
+    const y = 600 * Math.random();
+    const z = 1000 * (Math.random() - 0.5);
+    sprite.position.set(x, y, z);
+}
+
+// function loop() { //
+//     // loop()每次执行都会更新雨滴的位置，进而产生动画效果
+//     group.children.forEach((sprite) => {
+//         // 雨滴的y坐标每次减1
+//         sprite.position.y -= 1;
+//         if (sprite.position.y < 0) {
+//             // 如果雨滴落到地面，重置y，从新下落
+//             sprite.position.y = 600;
+//         }
+//     });
+//     requestAnimationFrame(loop);
+// }
+const clock = new THREE.Clock();
+function loop() {
+    // loop()两次执行时间间隔
+    const t = clock.getDelta();
+    // loop()每次执行都会更新雨滴的位置，进而产生动画效果
+    group.children.forEach((sprite) => {
+        // 雨滴的y坐标每次减t*60
+        sprite.position.y -= t * 60;
+        if (sprite.position.y < 0) {
+            // 如果雨滴落到地面，重置y，从新下落
+            sprite.position.y = 600;
+        }
+    });
+    requestAnimationFrame(loop);
+}
+loop();
+export default model;
