@@ -10,7 +10,8 @@
     <!-- <camera-demo /> -->
     <!-- <orbit-controls /> -->
     <!-- <light-demo /> -->
-    <sprite-demo />
+    <!-- <sprite-demo /> -->
+    <effect-composer />
 </template>
 
 <script setup lang="ts">
@@ -25,5 +26,6 @@
 // import CameraDemo from './components/CameraDemo/index.vue';
 // import OrbitControls from './components/OrbitControls/index.vue';
 // import LightDemo from './components/LightDemo/index.vue';
-import SpriteDemo from './components/SpriteDemo/index.vue';
+// import SpriteDemo from './components/SpriteDemo/index.vue';
+import EffectComposer from './components/EffectComposer/index.vue';
 </script>
