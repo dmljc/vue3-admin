@@ -4,8 +4,8 @@
         <div id="px" class="bu">X轴正</div>
         <div id="nx" class="bu">X轴负</div>
         <div id="y" class="bu">y轴</div>
-        <div id="pz" class="bu" >z轴正</div>
-        <div id="nz" class="bu" >z轴负</div>
+        <div id="pz" class="bu">z轴正</div>
+        <div id="nz" class="bu">z轴负</div>
     </div>
 </template>
 
@@ -43,7 +43,6 @@ loader.load('/图维建模数据/textured_output14.gltf', (gltf) => {
 
     renderer.render(scene, camera);
 });
-
 
 // max
 // 0.44912999868392944
@@ -107,7 +106,6 @@ onMounted(() => {
         renderer.render(scene, camera);
     });
 
-
     document.getElementById('pz').addEventListener('click', () => {
         camera.position.set(0, 0, 5); //z轴方向观察
         camera.lookAt(0, 0, 0); //重新计算相机视线方向
@@ -122,7 +120,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 .pos {
     position: absolute;
     left: 200px;
@@ -141,5 +138,4 @@ onMounted(() => {
 .bu:hover {
     cursor: pointer;
 }
-
 </style>
