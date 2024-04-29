@@ -46,7 +46,7 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue';
 import { asyncRouterMap } from '../router/index';
 
 const selectedKeys = ref<string[]>(['home']);
-const collapsed = ref<boolean>(false);
+const collapsed = ref<boolean>(true);
 
 const router = useRouter();
 
