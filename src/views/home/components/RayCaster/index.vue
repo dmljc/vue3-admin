@@ -1,14 +1,14 @@
 <template>
-    <div ref="raycaster"></div>
+    <div ref="raycasterDom"></div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model.js';
+import { model, mesh1, mesh2, mesh3 } from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-const raycaster = ref(null);
+const raycasterDom = ref(null);
 
 const width = computed(() => {
     return window.innerWidth - 174;
@@ -35,8 +35,6 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
 // 相机
-// const width = window.innerWidth - 296;
-// const height = window.innerHeight - 136;
 const camera = new THREE.PerspectiveCamera(30, width.value / height.value, 1, 3000);
 camera.position.set(350, 250, 300);
 camera.lookAt(0, 0, 0);
@@ -56,8 +54,6 @@ controls.addEventListener('change', () => {
 
 // resize 事件会在窗口被调整大小时发生
 window.addEventListener('resize', () => {
-    // const w = window.innerWidth - 296;
-    // const h = window.innerHeight - 136;
     renderer.setSize(width.value, height.value);
     camera.aspect = width.value / height.value;
     // 如果相机的一些属性发生了变化，需要执行 updateProjectionMatrix ()方法更新相机的投影矩阵
@@ -66,7 +62,7 @@ window.addEventListener('resize', () => {
 
 onMounted(() => {
     renderer.setClearColor(0x444544, 0.4);
-    raycaster.value?.appendChild(renderer.domElement);
+    raycasterDom.value?.appendChild(renderer.domElement);
 });
 
 onUnmounted(() => {
@@ -79,4 +75,19 @@ const render = () => {
     requestAnimationFrame(render);
 };
 render();
+
+// 创建射线投射器
+const raycaster = new THREE.Raycaster();
+// 射线投射器起点
+raycaster.ray.origin = new THREE.Vector3(-100, 0, 0);
+// 射线投射器方向
+raycaster.ray.direction = new THREE.Vector3(1, 0, 0);
+
+const intersects = raycaster.intersectObjects([mesh1, mesh2, mesh3]);
+console.log('=======射线投射器返回的对象====', intersects);
+
+// 若选中模型，则遍历修改所有模型的颜色为蓝色
+intersects?.forEach((item) => {
+    item.object.material.color.set(0x0000ff);
+});
 </script>
