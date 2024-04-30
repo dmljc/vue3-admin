@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import { model, mesh1, mesh2, mesh3 } from './model.js';
+import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const raycasterDom = ref(null);
@@ -76,18 +76,15 @@ const render = () => {
 };
 render();
 
-// 创建射线投射器
-const raycaster = new THREE.Raycaster();
-// 射线投射器起点
-raycaster.ray.origin = new THREE.Vector3(-100, 0, 0);
-// 射线投射器方向
-raycaster.ray.direction = new THREE.Vector3(1, 0, 0);
+window.addEventListener('click', (event) => {
+    const px = event.offsetX;
+    const py = event.offsetY;
 
-const intersects = raycaster.intersectObjects([mesh1, mesh2, mesh3]);
-console.log('=======射线投射器返回的对象====', intersects);
+    // 屏幕坐标px,py 转标设备坐标x，y
+    // width和height 表示canvas 画布宽高度
 
-// 若选中模型，则遍历修改所有模型的颜色为蓝色
-intersects?.forEach((item) => {
-    item.object.material.color.set(0x0000ff);
+    const x = (px / width.value) * 2 - 1;
+    const y = -(py / height.value) * 2 + 1;
+    console.log('x, y============', x, y);
 });
 </script>
