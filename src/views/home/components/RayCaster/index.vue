@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model.js';
+import { model, mesh1, mesh2, mesh3 } from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const raycasterDom = ref(null);
@@ -76,15 +76,35 @@ const render = () => {
 };
 render();
 
-window.addEventListener('click', (event) => {
+// window.addEventListener('click', (event) => {
+//     const px = event.offsetX;
+//     const py = event.offsetY;
+
+//     // 屏幕坐标px,py 转标设备坐标x，y
+//     // width和height 表示canvas 画布宽高度
+
+//     const x = (px / width.value) * 2 - 1;
+//     const y = -(py / height.value) * 2 + 1;
+//     console.log('x, y============', x, y);
+// });
+
+renderer.domElement.addEventListener('click', (event) => {
+    // 1、屏幕坐标转为标准设备坐标
     const px = event.offsetX;
     const py = event.offsetY;
-
-    // 屏幕坐标px,py 转标设备坐标x，y
-    // width和height 表示canvas 画布宽高度
-
     const x = (px / width.value) * 2 - 1;
     const y = -(py / height.value) * 2 + 1;
-    console.log('x, y============', x, y);
+
+    // 计算射线方法
+    // 创建一个射线投射器 raycaster
+    const raycaster = new THREE.Raycaster();
+    // .setFromCamera() 计算射线投射器的射线属性.ray
+    // 形象点说就是在点击位置创建一条射线，用来选中拾取模型对象
+    raycaster.setFromCamera(new THREE.Vector3(x, y), camera);
+    // interscctObjects 对参数中的网格模型对象进行射线交叉计算
+    const intersects = raycaster.intersectObjects([mesh1, mesh2, mesh3]);
+    if (intersects.length > 0) {
+        intersects[0].object.material.color.set(0xff0000);
+    }
 });
 </script>
