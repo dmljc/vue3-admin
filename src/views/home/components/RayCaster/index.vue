@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed,onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -11,10 +11,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 const raycaster = ref(null);
 
 const width = computed(() => {
-    return  window.innerWidth - 174;
+    return window.innerWidth - 174;
 });
 const height = computed(() => {
-    return  window.innerHeight - 136;
+    return window.innerHeight - 136;
 });
 // 场景
 const scene = new THREE.Scene();

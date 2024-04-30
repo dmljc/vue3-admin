@@ -4,9 +4,15 @@ import * as THREE from 'three';
 const geometry = new THREE.BufferGeometry();
 // 类型数组创建顶点数据
 const vertices = new Float32Array([
-    100, 25, 0,  // 顶点1坐标
-    100, -25, 25, // 顶点2坐标
-    100, -25, -25, // 顶点3坐标
+    100,
+    25,
+    0, // 顶点1坐标
+    100,
+    -25,
+    25, // 顶点2坐标
+    100,
+    -25,
+    -25 // 顶点3坐标
 ]);
 
 // 创建属性缓冲区对象, 3个为一组，标示一个顶点的xyz坐标
@@ -16,7 +22,7 @@ geometry.attributes.position = attribue;
 
 const material = new THREE.MeshBasicMaterial({
     color: 0x00ffff,
-    side: THREE.FrontSide, // 仅正面可见
+    side: THREE.FrontSide // 仅正面可见
 });
 
 const mesh = new THREE.Mesh(geometry, material);
@@ -36,11 +42,11 @@ const p3 = new THREE.Vector3(100, -25, -25);
 const point = new THREE.Vector3();
 const result = ray.intersectTriangle(p1, p2, p3, false, point);
 console.log('point----false---交叉点坐标', point); // _Vector3 {x: 100, y: 0, z: 0}
-console.log('result----false---查看是否相交', result);  // _Vector3 {x: 100, y: 0, z: 0}
+console.log('result----false---查看是否相交', result); // _Vector3 {x: 100, y: 0, z: 0}
 
 // 参数4 设为true 是背面剔除的意思，返回值null,返回值为null,虽然交叉，但是背面对着射线，视为无效
 const r = ray.intersectTriangle(p1, p2, p3, true, point);
 
-console.log('point-----true---交叉点坐标', point);  // _Vector3 {x: 100, y: 0, z: 0}
+console.log('point-----true---交叉点坐标', point); // _Vector3 {x: 100, y: 0, z: 0}
 console.log('r-----true---查看是否相交', r); // null
 export default mesh;
