@@ -1,26 +1,31 @@
 import * as THREE from 'three';
 
-const geometry = new THREE.BoxGeometry(50, 50, 50);
+// 一组二维向量表示一个多边形轮廓坐标
+const pointsArr = [new THREE.Vector2(50, 60), new THREE.Vector2(50, -60)];
+// 通过2点定一个二维样条曲线
+const curves = new THREE.SplineCurve(pointsArr);
+// 曲线上获取点，作为旋转几何体的旋转轮廓
+const points = curves.getPoints();
+// pointsArr 轮廓绕y轴旋转生成几何体曲面
+const geometry = new THREE.LatheGeometry(points, 4);
 const material = new THREE.MeshLambertMaterial({
-    color: 0x009999
+    color: 0x00ffff,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.5
 });
-const mesh1 = new THREE.Mesh(geometry, material);
+const mesh = new THREE.Mesh(geometry, material);
+mesh.rotateY(Math.PI / 4);
 
-const mesh2 = mesh1.clone();
-mesh2.material = new THREE.MeshLambertMaterial({
-    color: 0x999900
-});
-mesh2.position.y = 100;
+// 平面
+const planeGeometry = new THREE.PlaneGeometry(80, 80);
+const planeMaterial = material.clone();
+planeMaterial.opacity = 0.9;
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.rotateX(Math.PI / 2);
+plane.position.y = -60;
 
-const mesh3 = mesh1.clone();
+const group = new THREE.Group();
+group.add(mesh, plane);
 
-mesh3.material = new THREE.MeshLambertMaterial({
-    color: 0x990099
-});
-
-mesh3.position.x = 100;
-
-const model = new THREE.Group();
-model.add(mesh1, mesh2, mesh3);
-
-export { model, mesh1, mesh2, mesh3 };
+export default group;
