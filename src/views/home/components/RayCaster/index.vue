@@ -7,6 +7,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { message } from 'ant-design-vue';
 
 const well = ref(null);
 
@@ -22,7 +23,7 @@ const scene = new THREE.Scene();
 scene.add(model);
 
 // 辅助观察坐标系
-const axesHelper = new THREE.AxesHelper(160);
+const axesHelper = new THREE.AxesHelper(500);
 scene.add(axesHelper);
 
 // 灯光
@@ -36,7 +37,7 @@ scene.add(ambientLight);
 
 // 相机
 const camera = new THREE.PerspectiveCamera(30, width.value / height.value, 1, 3000);
-camera.position.set(350, 250, 300);
+camera.position.set(1000, 1000, 1000);
 camera.lookAt(0, 0, 0);
 
 // 渲染器
@@ -75,4 +76,36 @@ const render = () => {
     requestAnimationFrame(render);
 };
 render();
+
+// 添加点击事件监听
+function onClick(event) {
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // 将鼠标位置转换成归一化设备坐标(-1 到 +1)
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // 使用鼠标位置和相机进行射线投射
+    raycaster.setFromCamera(mouse, camera);
+
+    // 计算物体和射线的交点
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    // 如果有交点，输出信息
+    const { object } = intersects?.[0];
+    if (intersects.length > 0) {
+        const { holes } = object.geometry.parameters.shapes;
+        holes.forEach((el) => {
+            if (el.name === '圆孔1') {
+                message.success('点击了圆孔1');
+            } else {
+                message.success('点击了圆孔2');
+            }
+        });
+    }
+}
+
+// 监听鼠标点击事件
+renderer.domElement.addEventListener('click', onClick, false);
 </script>
