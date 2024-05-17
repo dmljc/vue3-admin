@@ -1,0 +1,25 @@
+.blander-container {
+    .pos {
+        position: absolute;
+        left: 200px;
+        top: 200px;
+    }
+
+    .bu {
+        background: rgba(255, 255, 255, 0.1);
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        color: #fff;
+        border-radius: 30px;
+    }
+
+    .bu:hover {
+        cursor: pointer;
+    }
+
+    .measure {
+        background-color: v-bind("isMeasure ? '#ccc' : 'rgba(255, 255, 255, 0.1)'");
+    }
+}

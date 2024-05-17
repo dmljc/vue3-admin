@@ -5,9 +5,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
-import model from './model.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { message } from 'ant-design-vue';
+// 引入CSS2模型对象CSS2DObject
+import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { group, boxMesh } from './model.js';
 
 const well = ref(null);
 
@@ -20,7 +22,7 @@ const height = computed(() => {
 // 场景
 const scene = new THREE.Scene();
 
-scene.add(model);
+scene.add(group);
 
 // 辅助观察坐标系
 const axesHelper = new THREE.AxesHelper(500);
@@ -83,8 +85,8 @@ function onClick(event) {
     const mouse = new THREE.Vector2();
 
     // 将鼠标位置转换成归一化设备坐标(-1 到 +1)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = (event.clientX / width.value) * 2 - 1;
+    mouse.y = -(event.clientY / height.value) * 2 + 1;
 
     // 使用鼠标位置和相机进行射线投射
     raycaster.setFromCamera(mouse, camera);
@@ -93,19 +95,33 @@ function onClick(event) {
     const intersects = raycaster.intersectObjects(scene.children);
 
     // 如果有交点，输出信息
-    const { object } = intersects?.[0];
     if (intersects.length > 0) {
-        const { holes } = object.geometry.parameters.shapes;
-        holes.forEach((el) => {
-            if (el.name === '圆孔1') {
-                message.success('点击了圆孔1');
-            } else {
-                message.success('点击了圆孔2');
-            }
+        const pointList = [];
+        intersects.forEach((item) => {
+            pointList.push(item.point);
         });
+
+        console.log('pointlistt=====', pointList.length, pointList);
+
+        const material = new THREE.LineBasicMaterial({
+            color: 0xff0000
+        });
+        const geometry = new THREE.BufferGeometry().setFromPoints(pointList);
+
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
     }
 }
 
 // 监听鼠标点击事件
 renderer.domElement.addEventListener('click', onClick, false);
 </script>
+
+<style scoped>
+#tag {
+    width: 40px;
+    height: 40px;
+    background-color: red;
+    border-radius: 100%;
+}
+</style>
