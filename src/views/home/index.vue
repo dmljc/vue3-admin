@@ -1,18 +1,6 @@
 <template>
-    <!-- <base-concepts /> -->
-    <!-- <Vector3 /> -->
-    <!-- <dome /> -->
-    <!-- <uv-texture /> -->
-    <blender />
-    <!-- <PBRMaterial /> -->
-    <!-- <canvas-event /> -->
-    <!-- <curve-demo /> -->
-    <!-- <camera-demo /> -->
-    <!-- <orbit-controls /> -->
-    <!-- <light-demo /> -->
-    <!-- <sprite-demo /> -->
-    <!-- <effect-composer /> -->
-    <!-- <ray-caster /> -->
+    <!-- <blender /> -->
+    <tw-well />
 </template>
 
 <script setup lang="ts">
@@ -20,7 +8,7 @@
 // import Vector3 from './components/Vector3/index.vue';
 // import Dome from './components/Demo/index.vue';
 // import UvTexture from './components/UvTexture/index.vue';
-import Blender from './components/Blender/index.vue';
+// import Blender from './components/Blender/index.vue';
 // import PBRMaterial from './components/PBRMaterial/index.vue';
 // import CanvasEvent from './components/CanvasEvent/index.vue';
 // import CurveDemo from './components/CurveDemo/index.vue';
@@ -30,4 +18,5 @@ import Blender from './components/Blender/index.vue';
 // import SpriteDemo from './components/SpriteDemo/index.vue';
 // import EffectComposer from './components/EffectComposer/index.vue';
 // import RayCaster from './components/RayCaster/index.vue';
+import TwWell from './components/TwWell/index.vue';
 </script>
