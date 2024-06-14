@@ -80,10 +80,10 @@ export const createSphere = (point: THREE.Vector3, camera: THREE.PerspectiveCame
     const sphere = new THREE.Mesh(geometry, material);
     const quaternion = new THREE.Quaternion();
     sphere.quaternion.multiply(quaternion);
-    sphere.position.copy({
-        ...point,
-        x: point.x + 0.01
-    });
+    const el = point.clone();
+    el.x += 0.01;
+    sphere.position.copy(el);
+    sphere.name = '小红点';
     return sphere;
 };
 
@@ -99,10 +99,9 @@ export const createRectPoints = (startPoint: THREE.Vector3, endPoint: THREE.Vect
     let result = [];
     result.push(startPoint, D, endPoint, C);
     result = result.map((item) => {
-        return {
-            ...item,
-            x: item.x + 0.01 // x轴坐标都增加0.01 尽量避免线显示不完整
-        };
+        const el = item.clone();
+        el.x += 0.01;
+        return el;
     });
     return result;
 };
@@ -128,20 +127,42 @@ export const drawRectWithFourPoints = (points: THREE.Vector3[]) => {
     return line;
 };
 
-// /* 
-// *@createMarkSize() 根据起始三维坐标生成标注尺寸网格模型
-// *@params:(startPoint: 起始点三维坐标, endPoint: 结束点三维坐标, length: 标注的长度尺寸)
-// */
-export const createMarkLength = (p1: THREE.Vector3, p2: THREE.Vector3, length: string) => {
+/*
+ *@createMarkSize() 根据起始三维坐标生成标注尺寸网格模型
+ *@params:(startPoint: 起始点三维坐标, endPoint: 结束点三维坐标, length: 标注的长度尺寸)
+ */
+export const createMarkLength = (
+    startPoint: THREE.Vector3,
+    endPoint: THREE.Vector3,
+    length: string
+) => {
     const div = document.createElement('div');
     div.style.color = '#fff';
-    div.style.background = '#fff';
-    div.textContent = `${length}米`;
+    div.innerHTML = `${length}米`;
 
-    const mesh = new CSS2DObject(div);
-    const center = p1?.clone()?.add(p2)?.divideScalar(2);
-    mesh.position.copy(center);
-    mesh.name = '标注尺度';
+    const size = new CSS2DObject(div);
+    const center = startPoint.clone().add(endPoint)?.divideScalar(2);
+    size.position.copy(center);
+    size.name = '标注尺度';
+    return size;
+};
 
-    return mesh;
+/*
+ *@createLine() 两点创建一条线段
+ *@params:(startPoint: 起始点三维坐标, endPoint: 结束点三维坐标)
+ */
+export const createLine = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) => {
+    const { x: x1, y: y1, z: z1 } = startPoint;
+    const { x: x2, y: y2, z: z2 } = endPoint;
+    const material = new THREE.LineBasicMaterial({
+        color: 0xffff00,
+        depthTest: false
+    });
+    // 创建一个几何体对象
+    const geometry = new THREE.BufferGeometry();
+    // 类型数组创建顶点数据
+    const vertices = new Float32Array([x1, y1, z1, x2, y2, z2]);
+    geometry.attributes.position = new THREE.BufferAttribute(vertices, 3);
+    const line = new THREE.LineSegments(geometry, material);
+    return line;
 };

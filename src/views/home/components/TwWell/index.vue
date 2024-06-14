@@ -9,10 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-// import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {
     CreateTwin,
     box3Center,
@@ -20,7 +19,7 @@ import {
     createSphere,
     createRectPoints,
     drawRectWithFourPoints,
-    // createMarkLength,
+    createMarkLength,
     getDistance,
 } from 'twin/index';
 
@@ -33,15 +32,16 @@ const loader = new GLTFLoader();
 let clickNum: number = 0; //记录点击次数
 let p1: THREE.Vector3 = null;
 let p2: THREE.Vector3 = null;
-let distance: string = null; // 两点之间的距离
 let rectLine: THREE.Object3D; // 矩形剖面线条
+
+// 剖面标注组，包含：矩形4条边和4条边对应的尺寸
+const planeMarkGroup = new THREE.Group();
 
 // 加载gltf文件
 loader.load('/图维建模数据/textured_output08.gltf', (gltf) => {
     const mesh = gltf.scene.children[0];
     box3Center(mesh);
     twin.scene.add(mesh);
-    twin.renderOnce();
 });
 
 // 辅助观察坐标系
@@ -53,9 +53,11 @@ const onPlaneMark = () => {
     planeMarkIng.value = !planeMarkIng.value;
 };
 
-// 画小圆点
+// 边界场景处理
+// 画小圆点 
 const drawSphere = (point) => {
     if (!point) {
+        clickNum = 0;
         return console.warn('请点击网格模型区域');
     }
     const sphere = createSphere(point, twin.camera);
@@ -63,14 +65,12 @@ const drawSphere = (point) => {
 };
 
 const onKeyDown = (event) => {
-    // console.log('code====', event.code);
-    // Escape: Esc 键
     if (['Escape'].includes(event.code)) {
-        // planeMarkIng.value = false;
         onPlaneMark();
     }
 };
 
+// css2d 标注的样式
 const css2RendererStyle = () => {
     twin.css2Renderer.domElement.style.position = 'absolute';
     twin.css2Renderer.domElement.style.top = '100px';
@@ -92,27 +92,37 @@ const onMouseDown = (event) => {
             drawSphere(point);
 
             if (p1 && p2) {
-                distance = getDistance(p1, p2);
-
+                // 画矩形
                 const points = createRectPoints(p1, p2);
-                const line = drawRectWithFourPoints(points);
-                twin.scene.add(line);
+                const rect = drawRectWithFourPoints(points);
 
-                // const sizeMesh = createMarkLength(points[0], points[1], distance);
-                // twin.scene.add(sizeMesh);
+                // 逆时针顺序解构出对应的4个顶点
+                const [A, D, B, C] = points;
+                // 长
+                const sizeAC = createMarkLength(A, C, getDistance(A, C));
+                const sizeDB = createMarkLength(D, B, getDistance(D, B));
+                // 宽
+                const sizeAD = createMarkLength(A, D, getDistance(A, D));
+                const sizeCB = createMarkLength(C, B, getDistance(C, B));
 
-                css2RendererStyle();
-
+                planeMarkGroup.add(sizeAC, sizeDB, sizeAD, sizeCB, rect);
+                twin.scene.add(planeMarkGroup);
             }
             clickNum = 0;
             p1 = null;
             p2 = null;
         }
+
+        css2RendererStyle();
     }
 };
 
 const onMouseMove = (event) => {
     event.preventDefault();
+    if (!planeMarkIng.value) {
+        clickNum = 0; // 重置点击次数
+        return;
+    }
     const point = getRayCasterPoint(event, twin);
     if (rectLine) {
         twin.scene.remove(rectLine);
@@ -121,8 +131,6 @@ const onMouseMove = (event) => {
         const points = createRectPoints(p1, point);
         rectLine = drawRectWithFourPoints(points);
         twin.scene.add(rectLine);
-
-        // console.log('p2', point);
     }
 };
 
@@ -131,8 +139,9 @@ twin.renderer.domElement.addEventListener('mousedown', onMouseDown);
 twin.renderer.domElement.addEventListener('mousemove', onMouseMove);
 
 onMounted(() => {
-    webgl.value.appendChild(twin.renderer.domElement);
     twin.renderer.setClearColor(0x444544);
+    webgl.value.appendChild(twin.renderer.domElement);
+    webgl.value.appendChild(twin.css2Renderer.domElement);
 });
 
 onUnmounted(() => {

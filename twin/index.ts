@@ -7,4 +7,5 @@ export {
     getDistance,
     drawRectWithFourPoints,
     createMarkLength,
+    createLine,
 } from './Utils';
