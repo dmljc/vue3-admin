@@ -22,5 +22,14 @@ export default defineConfig({
                 // rewrite: (path) => path.replace(/^\/api/, ''),
             }
         }
+    },
+    css: {
+        preprocessorOptions: {
+            less: {
+                charset: false,
+                // 这里可以配置LESS的全局变量等
+                // additionalData: ['@import "./src/style/mixin.less";'],
+            },
+        }
     }
 });

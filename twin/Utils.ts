@@ -63,6 +63,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
         // 获取模型上选中的一点坐标
         point = result[0].point;
     }
+
     return point;
 };
 
@@ -72,7 +73,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
  */
 export const createSphere = (point: THREE.Vector3, camera: THREE.PerspectiveCamera) => {
     const L = camera.position?.clone().sub(point).length();
-    const geometry = new THREE.SphereGeometry(L / 600);
+    const geometry = new THREE.SphereGeometry(L / 500);
     const material = new THREE.MeshBasicMaterial({
         color: 0xff0000,
         depthTest: false
@@ -118,12 +119,13 @@ export const getDistance = (startPoint: THREE.Vector3, endPoint: THREE.Vector3, 
  *@drawRectWithFourPoints() 根据四个点的三维坐标画矩形
  *@parmas:(points: 4个点的三维坐标数组)
  */
-export const drawRectWithFourPoints = (points: THREE.Vector3[]) => {
+export const drawRectWithFourPoints = (points: THREE.Vector3[], name?: string) => {
     const material = new THREE.LineBasicMaterial({
         color: 0xff0000
     });
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.LineLoop(geometry, material);
+    line.name = name;
     return line;
 };
 
@@ -134,7 +136,8 @@ export const drawRectWithFourPoints = (points: THREE.Vector3[]) => {
 export const createMarkLength = (
     startPoint: THREE.Vector3,
     endPoint: THREE.Vector3,
-    length: string
+    length: string,
+    pageNum?: number
 ) => {
     const div = document.createElement('div');
     div.style.color = '#fff';
@@ -143,8 +146,30 @@ export const createMarkLength = (
     const size = new CSS2DObject(div);
     const center = startPoint.clone().add(endPoint)?.divideScalar(2);
     size.position.copy(center);
-    size.name = '标注尺度';
+    size.name = `剖面序号${pageNum}-尺寸`;
     return size;
+};
+
+/*
+ *createPageNum() 创建剖面的序号
+ *@params: (startPoint: 起始点三维坐标, endPoint: 结束点三维坐标, pageNum: 当前剖面的序号)
+ */
+export const createPageNum = (
+    startPoint: THREE.Vector3,
+    endPoint: THREE.Vector3,
+    pageNum: number
+) => {
+    const div = document.createElement('div');
+    div.style.color = '#fff';
+    div.style.fontSize = '80px';
+    div.style.opacity = '0.4';
+    div.innerHTML = `${pageNum}`;
+
+    const pageNumber = new CSS2DObject(div);
+    const center = startPoint.clone().add(endPoint)?.divideScalar(2);
+    pageNumber.position.copy(center);
+    pageNumber.name = `剖面序号${pageNum}`;
+    return pageNumber;
 };
 
 /*
@@ -165,4 +190,56 @@ export const createLine = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) =
     geometry.attributes.position = new THREE.BufferAttribute(vertices, 3);
     const line = new THREE.LineSegments(geometry, material);
     return line;
+};
+
+/*
+ *css2RendererStyle() css2d 标注的样式
+ *@params: (twin: threejs 实例)
+ */
+export const css2RendererStyle = (twin: CreateTwin) => {
+    twin.css2Renderer.domElement.style.position = 'absolute';
+    twin.css2Renderer.domElement.style.top = '105px';
+    twin.css2Renderer.domElement.style.pointerEvents = 'none';
+};
+
+/*
+ *removeDblClicCreateRect() 销毁双击创建的剖面线和尺寸标注，释放内存
+ *@params: (twin: threejs 实例)
+ */
+export const removeDblClicCreateRect = (twin: CreateTwin) => {
+    twin.scene.traverse((obj: any) => {
+        if (obj?.isLineLoop || obj?.isCSS2DObject) {
+            twin.scene.remove(obj);
+        }
+    });
+};
+
+/*
+ *drewRect() 用起始点坐标绘制剖面标注，并标注当前剖面的序号
+ * @params: (startPoint: 起始点三维坐标, endPoint: 结束点三维坐标, pageNum: 当前剖面的序号)
+ */
+export const drewRect = (startPoint: THREE.Vector3, endPoint: THREE.Vector3, pageNum: number) => {
+    const points = createRectPoints(startPoint, endPoint);
+    const rect = drawRectWithFourPoints(points, `剖面序号${pageNum}-线`);
+
+    // 逆时针顺序解构出对应的4个顶点
+    const [A, D, B, C] = points;
+    // 长
+    const sizeAC = createMarkLength(A, C, getDistance(A, C), pageNum);
+    const sizeDB = createMarkLength(D, B, getDistance(D, B), pageNum);
+    // 宽
+    const sizeAD = createMarkLength(A, D, getDistance(A, D), pageNum);
+    const sizeCB = createMarkLength(C, B, getDistance(C, B), pageNum);
+
+    // 剖面序号
+    const pageNumber = createPageNum(startPoint, endPoint, pageNum);
+
+    return {
+        rect,
+        sizeAC,
+        sizeDB,
+        sizeAD,
+        sizeCB,
+        pageNumber
+    };
 };

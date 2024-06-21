@@ -4,7 +4,12 @@
         <div id="measure" class="bu measure" @click="onSeasure">剖面标注</div>
         <div id="measure" class="bu measure2" @click="onSeasure2">管控标注</div>
 
-        <a-select v-model:value="hole" :options="options" style="width: 100px;" @change="handleChange" />
+        <a-select
+            v-model:value="hole"
+            :options="options"
+            style="width: 100px"
+            @change="handleChange"
+        />
     </div>
 </template>
 
@@ -17,10 +22,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import UseModel from './useModel.js';
-import {
-    createRectPoints,
-} from '../../../../../twin';
-
+import { createRectPoints } from '../../../../../twin';
 
 const webgl = ref(null);
 const scene = new THREE.Scene();
@@ -53,30 +55,30 @@ loader.load('/图维建模数据/textured_output08.gltf', (gltf) => {
 const options = ref<SelectProps['options']>([
     {
         value: 50,
-        label: '50mm',
+        label: '50mm'
     },
     {
         value: 100,
-        label: '100mm',
+        label: '100mm'
     },
     {
         value: 150,
-        label: '150mm',
+        label: '150mm'
     },
     {
         value: 175,
-        label: '175mm',
+        label: '175mm'
     },
     {
         value: 200,
-        label: '200mm',
+        label: '200mm'
     },
     {
         value: 300,
-        label: '300mm',
-    },
+        label: '300mm'
+    }
 ]);
-const handleChange: SelectProps['onChange'] = value => {
+const handleChange: SelectProps['onChange'] = (value) => {
     console.log('value', value);
 };
 
@@ -103,8 +105,22 @@ const render = () => {
 
 render();
 
-const { rayChoosePoint, createSphere, getDistance, drewHole, sizeTag, markSizeGroup, usefourPointsDrewRect } = UseModel({
-    scene, camera, renderer, css2Renderer, hole, width, height,
+const {
+    rayChoosePoint,
+    createSphere,
+    getDistance,
+    drewHole,
+    sizeTag,
+    markSizeGroup,
+    usefourPointsDrewRect
+} = UseModel({
+    scene,
+    camera,
+    renderer,
+    css2Renderer,
+    hole,
+    width,
+    height,
     dragHole
 });
 
@@ -192,7 +208,6 @@ renderer.domElement.addEventListener('mousedown', (event) => {
             p2 = null;
         }
     }
-
 });
 
 renderer.domElement.addEventListener('dblclick', (event) => {
@@ -233,7 +248,6 @@ renderer.domElement.addEventListener('mousedown', () => {
     // 拖放控制器
     const dragControls = new DragControls(dragList, camera, renderer.domElement);
 
-
     dragControls.addEventListener('drag', function (event) {
         orbitControls.enabled = false;
         dragHole.value = event.object;
@@ -246,17 +260,10 @@ renderer.domElement.addEventListener('mousedown', () => {
         css2Renderer.render(scene, camera);
     });
 
-
     dragControls.addEventListener('dragend', function (event) {
         orbitControls.enabled = true;
     });
 });
-
-
-
-
-
-
 </script>
 
 <style scoped lang="less">

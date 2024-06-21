@@ -9,7 +9,6 @@ const useModel = (props) => {
 
     // 射线拾取选择场景模型表面任意点xyz坐标
     const rayChoosePoint = (event) => {
-
         const px = event.offsetX;
         const py = event.offsetY;
         //屏幕坐标转标准设备坐标
@@ -57,10 +56,10 @@ const useModel = (props) => {
         const material = new THREE.LineBasicMaterial({
             color: 0xff0000
         });
-    
-        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-        
-        const line = new THREE.LineLoop( geometry, material );
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+        const line = new THREE.LineLoop(geometry, material);
         return line;
     };
 
@@ -134,7 +133,7 @@ const useModel = (props) => {
         // } else {
         sphere.translateZ(0.01);
         // }
-        
+
         holeMarkSizeGroup.add(sphere);
         holeMarkSizeGroup.name = `管孔标注组-${hole.value}`;
 
@@ -191,7 +190,7 @@ const useModel = (props) => {
         drewHole,
         sizeTag,
         markSizeGroup,
-        usefourPointsDrewRect,
+        usefourPointsDrewRect
     };
 };
 

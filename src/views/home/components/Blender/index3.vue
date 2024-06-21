@@ -26,7 +26,6 @@ const material = new THREE.MeshLambertMaterial({
 const model = new THREE.Mesh(geometry, material);
 scene.add(model);
 
-
 // 辅助观察坐标系
 const axesHelper = new THREE.AxesHelper(200);
 scene.add(axesHelper);
@@ -70,7 +69,7 @@ const rayChoosePoint = (event) => {
     raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
     // 射线交叉计算拾取模型
     const result = raycaster.intersectObject(scene, true);
-    
+
     let v3 = null;
     if (result.length > 0) {
         // 获取模型上选中的一点坐标
@@ -79,7 +78,6 @@ const rayChoosePoint = (event) => {
 
     return v3;
 };
-
 
 // 创建标注尺寸
 const createMarkSize = (point, size, name) => {
@@ -136,7 +134,6 @@ controls.addEventListener('dragend', () => {
     // render();
 });
 
-
 // renderer.domElement.addEventListener('click', onClick);
 renderer.domElement.addEventListener('keydown', onKeyDown);
 renderer.domElement.addEventListener('keyup', onKeyUp);
@@ -145,9 +142,9 @@ const group = new THREE.Group();
 scene.add(group);
 
 function onKeyDown(event) {
-    enableSelection = (event.keyCode === 16) ? true : false;
+    enableSelection = event.keyCode === 16 ? true : false;
     if (event.keyCode === 77) {
-        controls.mode = (controls.mode === 'translate') ? 'rotate' : 'translate';
+        controls.mode = controls.mode === 'translate' ? 'rotate' : 'translate';
     }
 }
 
@@ -190,15 +187,7 @@ function onKeyUp() {
 // }
 
 const drewHole = (point) => {
-    const curve = new THREE.EllipseCurve(
-        point.x,
-        point.y,
-        20, 20,
-        0,
-        2 * Math.PI,
-        false,
-        0
-    );
+    const curve = new THREE.EllipseCurve(point.x, point.y, 20, 20, 0, 2 * Math.PI, false, 0);
 
     const points = curve.getPoints(50);
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -208,7 +197,6 @@ const drewHole = (point) => {
     scene.add(ellipse);
 
     createMarkSize(point, 200, '管孔标注');
-  
 };
 
 const css3RendererFn = () => {
@@ -223,10 +211,7 @@ const css3RendererFn = () => {
 renderer.domElement.addEventListener('dblclick', (event) => {
     const point = rayChoosePoint(event);
     drewHole(point);
-  
 });
-
-
 
 onMounted(() => {
     webgl.value.appendChild(renderer.domElement);
@@ -235,5 +220,4 @@ onMounted(() => {
 onUnmounted(() => {
     renderer.dispose();
 });
-
 </script>
