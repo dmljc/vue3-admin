@@ -8,7 +8,7 @@
 // import Vector3 from './components/Vector3/index.vue';
 // import Dome from './components/Demo/index.vue';
 // import UvTexture from './components/UvTexture/index.vue';
-// import Blender from './components/Blender/index.vue';
+// import Blender from './components/Blender/index3.vue';
 // import PBRMaterial from './components/PBRMaterial/index.vue';
 // import CanvasEvent from './components/CanvasEvent/index.vue';
 // import CurveDemo from './components/CurveDemo/index.vue';

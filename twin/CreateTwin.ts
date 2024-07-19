@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { disposeNode } from './Utils';
+import { disposeNode, getChromeVersion } from './Utils';
 
 interface Params {
     logCameraPosition?: boolean;
@@ -60,7 +60,6 @@ export class CreateTwin {
         this.css2Renderer = new CSS2DRenderer();
         this.css2Renderer.setSize(this.width, this.height);
 
-
         this.renderOnce = () => {
             if (this.scene && this.camera && this.renderer) {
                 this.renderer?.render(this.scene, this.camera);
@@ -106,6 +105,9 @@ export class CreateTwin {
             }
         });
 
+        // 获取当前浏览器的版本并检测是否支持WebGPU
+        getChromeVersion();
+
         // 销毁
         this.destroy = () => {
             if (this.animationId) {
@@ -114,6 +116,14 @@ export class CreateTwin {
             }
 
             this.scene?.traverse(disposeNode);
+
+            // 销毁控制器
+            if (this.controls && typeof this.controls.dispose === 'function') {
+                this.controls.dispose();
+            }
+
+            // 删除控制器引用
+            this.controls = null;
 
             if (this.renderer) {
                 this.renderer.dispose();

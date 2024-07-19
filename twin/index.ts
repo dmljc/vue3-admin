@@ -12,4 +12,8 @@ export {
     css2RendererStyle,
     removeDblClicCreateRect,
     drewRect,
+    drewCircleHole,
+    createHoleSize,
+    circleHoleEnum,
+    average,
 } from './Utils';
