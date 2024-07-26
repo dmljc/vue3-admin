@@ -1,29 +1,37 @@
+import { ref } from 'vue';
 import * as THREE from 'three';
-import { onUnmounted } from 'vue';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createHoleSize } from 'twin/index';
 
 const useHoleDrag = (props: any) => {
-    const { twin, circleList, paramsList, holeParams } = props;
+    const { twin, holeDragList } = props;
 
     let holeSize: CSS2DObject; // 管孔尺寸
     let hoverHole: THREE.Object3D<THREE.Object3DEventMap>; // 当前hover选中的圆弧管孔
     let isHoverOn: boolean = false; // 是否处于hover 状态
+    const holeDragedList = ref([]); // 拖拽后更新坐标数据之后的管孔列表
 
-    const dragControls = new DragControls(circleList, twin.camera, twin.renderer.domElement);
+    const dragControls = new DragControls(holeDragList, twin.camera, twin.renderer.domElement);
+    dragControls.mode = 'translate';
 
     // 显示管孔尺寸
-    const onHandle = (e: THREE.Event) => {
+    const onHandle = (e: any) => {
         if (holeSize) {
             twin.scene.remove(holeSize);
         }
         holeSize = createHoleSize(e);
         twin.scene.add(holeSize);
+        // 对拖拽的管孔列表遍历获取最新的坐标数据
+        const result = holeDragList.map((item: { uuid: any }) => {
+            if (item.uuid === e.object.uuid) {
+                return e.object;
+            } else {
+                return item;
+            }
+        });
 
-        holeParams.point = e.object.position;
-
-        console.log('hole-drag-holeParams', paramsList, holeParams.point);
+        holeDragedList.value = result;
     };
 
     // 拖拽中
@@ -46,7 +54,7 @@ const useHoleDrag = (props: any) => {
 
     // 监听鼠标右键事件
     const onContextMenu = (event: any) => {
-        if (!circleList.length) return;
+        if (!holeDragList.length) return;
         // 将菜单显示在鼠标位置
         rightMenu.style.top = event.clientY + 'px';
         rightMenu.style.left = event.clientX + 'px';
@@ -73,22 +81,19 @@ const useHoleDrag = (props: any) => {
 
     // 删除管孔
     document.getElementById('delete')?.addEventListener('click', () => {
-        const index = circleList.findIndex(
+        const index = holeDragList.findIndex(
             (item: { uuid: string }) => item.uuid === hoverHole?.uuid
         );
         // 从拖拽列表中移除
-        circleList.splice(index, 1);
+        holeDragList.splice(index, 1);
 
         twin.scene.remove(hoverHole);
         rightMenu.style.display = 'none';
     });
 
-    // 销毁拖拽控制器，释放内存
-    onUnmounted(() => {
-        dragControls.dispose();
-    });
-
-    return {};
+    return {
+        holeDragedList
+    };
 };
 
 export default useHoleDrag;

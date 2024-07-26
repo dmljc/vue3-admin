@@ -10,10 +10,9 @@ export {
     createMarkLength,
     createLine,
     css2RendererStyle,
-    removeDblClicCreateRect,
     drewRect,
     drewCircleHole,
     createHoleSize,
-    circleHoleEnum,
     average,
+    box3IsContainsPoint,
 } from './Utils';

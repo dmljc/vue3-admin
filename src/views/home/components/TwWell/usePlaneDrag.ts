@@ -5,13 +5,13 @@ import { drewRect } from 'twin/index';
 import { createSphere } from 'twin/Utils';
 
 const usePlaneDrag = (props: any) => {
-    const { twin, planeList, paramsList } = props;
+    const { twin, sphereEndDragList, planeParamsList } = props;
 
     // let isHoverOn: boolean = false; // 是否处于hover 状态
     // let hoverPlane: THREE.Object3D<THREE.Object3DEventMap>; // 当前处于hover 状态的剖面
 
     const groupDrag = new THREE.Group();
-    const dragControls = new DragControls(planeList, twin.camera, twin.renderer.domElement);
+    const dragControls = new DragControls(sphereEndDragList, twin.camera, twin.renderer.domElement);
 
     // 创建右键菜单的DOM结构
     const rightMenu = document.createElement('div');
@@ -30,13 +30,13 @@ const usePlaneDrag = (props: any) => {
     // };
 
     const onHandle = (e: any) => {
-        const params = paramsList?.filter((el: any) => {
+        const params = planeParamsList?.filter((el: any) => {
             if (el.pageNum === Number.parseInt(e.object.name.slice(9, 10))) {
                 return el;
             }
         })[0];
 
-        let { p1, pageNum, sphereStart, sphereEnd } = params;
+        let { p1, pageNum, sphereStart, sphereEnd } = params ?? {};
 
         const endPoint = e.object.position;
 
@@ -113,7 +113,7 @@ const usePlaneDrag = (props: any) => {
             sphereStart,
             sphereEnd
         );
-        planeList.push(sphereEnd);
+        sphereEndDragList.push(sphereEnd);
         const eventType = 'drag';
         groupDrag.name = `${eventType}-剖面标注组${pageNum}`;
         groupDrag.userData = {
@@ -122,7 +122,7 @@ const usePlaneDrag = (props: any) => {
         };
         twin.scene.add(groupDrag);
 
-        paramsList.forEach(
+        planeParamsList.forEach(
             (ele: { p2: any; width: number; pageNum: number; length: number; depth: number }) => {
                 if (pageNum === ele.pageNum) {
                     ele.length = length;

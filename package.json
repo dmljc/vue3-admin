@@ -16,10 +16,12 @@
     },
     "dependencies": {
         "@ant-design/icons-vue": "^7.0.1",
+        "@types/lodash-es": "^4.17.12",
         "@types/three": "^0.166.0",
         "ant-design-vue": "4.x",
         "axios": "^1.6.8",
         "dayjs": "^1.11.10",
+        "lodash-es": "^4.17.21",
         "pinia": "^2.1.7",
         "three": "^0.166.0",
         "vue": "^3.4.21",

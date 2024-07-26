@@ -1,7 +1,4 @@
 import * as THREE from 'three';
-import { ref } from 'vue';
-import { message } from 'ant-design-vue';
-import type { SelectProps } from 'ant-design-vue';
 import { CreateTwin } from './CreateTwin';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
@@ -56,11 +53,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
     // 射线交叉计算拾取模型
     const intersects = raycaster.intersectObject(scene, true);
     const result = intersects?.filter((item) => {
-        if (
-            item.object.name &&
-            !item.object.name.includes('剖面序号') &&
-            !item.object.name.includes('移动')
-        ) {
+        if (item.object.name && !item.object.name.includes('剖面序号')) {
             return item;
         }
     });
@@ -163,6 +156,9 @@ export const createMarkLength = (
 ) => {
     const div = document.createElement('div');
     div.style.color = '#fff';
+    div.style.padding = '2px 6px';
+    div.style.borderRadius = '3px';
+    div.style.background = 'rgba(0, 0, 0, 0.4)';
     div.innerHTML = `${length}`;
 
     const size = new CSS2DObject(div);
@@ -239,18 +235,6 @@ export const css2RendererStyle = (twin: CreateTwin) => {
 };
 
 /*
- *removeDblClicCreateRect() 销毁双击创建的剖面线和尺寸标注，释放内存
- *@params: (twin: threejs 实例)
- */
-export const removeDblClicCreateRect = (twin: CreateTwin) => {
-    twin.scene.traverse((obj: any) => {
-        if (obj?.isLineLoop || obj?.isCSS2DObject) {
-            twin.scene.remove(obj);
-        }
-    });
-};
-
-/*
  *drewRect() 用起始点坐标绘制剖面标注，并标注当前剖面的序号
  * @params: (startPoint: 起始点三维坐标, endPoint: 结束点三维坐标, pageNum: 当前剖面的序号)
  */
@@ -322,7 +306,7 @@ export const deleteIcon = (point: THREE.Vector3, hole: number) => {
  *drewCircleHole() 绘制圆形管孔
  *@params:(point: 三维坐标,hole：管孔直径)
  */
-export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: number) => {
+export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: number, message) => {
     if (!point) {
         message.warning('请点击非管孔区域');
         return;
@@ -340,7 +324,7 @@ export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: numb
     sphere.userData = {
         hole,
         pageNum,
-        wkt: point,
+        wkt: point
     };
     sphere.position.copy(point);
     sphere.rotateY(Math.PI / 2);
@@ -356,6 +340,9 @@ export const createHoleSize = (event: any) => {
     const { hole } = event.object.userData;
     const div = document.createElement('div');
     div.style.color = '#fff';
+    div.style.padding = '2px 6px';
+    div.style.borderRadius = '3px';
+    div.style.background = 'rgba(0, 0, 0, 0.4)';
     div.innerHTML = `${hole}`;
 
     const holeSize = new CSS2DObject(div);
@@ -383,21 +370,6 @@ export const getChromeVersion = () => {
     }
 };
 
-export const circleHoleEnum = ref<SelectProps['options']>([
-    {
-        value: 50,
-        label: '50mm'
-    },
-    {
-        value: 100,
-        label: '100mm'
-    },
-    {
-        value: 175,
-        label: '175mm'
-    }
-]);
-
 /*
  *average() 求工井长宽高的平均值
  *@params: (list:组装好的剖面数据, type：类型分别是 length，width，depth)
@@ -407,4 +379,45 @@ export const average = (list: any[], type = 'width') => {
         list.reduce((acc: number, cur: number) => acc + parseFloat(cur[type]), 0) / list.length;
 
     return val;
+};
+
+// 包围盒是否包含某个点
+export const box3IsContainsPoint = (plane, hole, twin) => {
+    const { x: sx, y: sy, z: sz } = plane.p1;
+    const { x: ex, y: ey, z: ez } = plane.p2;
+
+    // 剖面包围盒
+    const box3Plane = new THREE.Box3();
+
+    // 管孔包围盒
+    const box3Hole = new THREE.Box3();
+    // 计算模型最小包围盒
+    box3Hole.expandByObject(hole);
+
+    // 允许剖面最小包围盒存在的误差范围
+    const temp = 0.05; 
+    box3Plane.min = new THREE.Vector3(
+        Math.min(sx, ex) - temp,
+        Math.min(sy, ey),
+        Math.min(sz, ez)
+    );
+    box3Plane.max = new THREE.Vector3(
+        Math.max(sx, ex) + temp,
+        Math.max(sy, ey),
+        Math.max(sz, ez)
+    );
+
+    // 检查 box3Plane 是否包含 box3Hole
+    const bool = box3Plane.containsBox(box3Hole);
+
+    // 剖面包围盒辅助线
+    const helperPlane = new THREE.Box3Helper(box3Plane, 0xff0000);
+    // 管孔包围盒辅助线
+    // twin.scene.remove(helperHole);
+    const helperHole = new THREE.Box3Helper(box3Hole, 0x0000ff);
+
+    console.log('helperHole2', helperHole);
+    twin.scene.add(helperPlane, helperHole);
+
+    return bool;
 };

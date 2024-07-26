@@ -34,7 +34,8 @@
 <script setup lang="ts">
 import * as THREE from 'three';
 import { ref, onMounted, onUnmounted } from 'vue';
-import type { SelectProps } from 'ant-design-vue';
+import { message, type SelectProps } from 'ant-design-vue';
+import { cloneDeep } from 'lodash-es';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import {
     CreateTwin,
@@ -44,36 +45,40 @@ import {
     css2RendererStyle,
     drewRect,
     drewCircleHole,
-    circleHoleEnum,
-    average
+    average,
+    box3IsContainsPoint
 } from 'twin/index';
+import { circleHoleEnum, isExist } from './utils';
 import UseHoleDrag from './useHoleDrag.js';
 import UsePlaneDrag from './usePlaneDrag.js';
 import './index.less';
 
 const webgl = ref<HTMLDivElement>();
-const planeMarkIng = ref<boolean>(false); // 剖面标注
-const holeMarkIng = ref<boolean>(true); // 管孔标注
+const planeMarkIng = ref<boolean>(true); // 剖面标注
+const holeMarkIng = ref<boolean>(false); // 管孔标注
 
 const twin = new CreateTwin();
 const loader = new GLTFLoader();
 const hole = ref<number>(175); // 管孔直径尺寸
 
-let clickNum: number = 0; //记录点击次数
+let clickNum: number = 0; // 记录点击次数
 let p1: THREE.Vector3 = null; // 起点坐标
 let p2: THREE.Vector3 = null; // 终点坐标
 let pageNum: number = 1; // 剖面的序号
 
-let circleList = []; // 圆形管孔列表
-let planeList = []; // 剖面列表
+let sphereEndDragList = []; // 剖面终点小球列表
+let holeDragList = []; // 圆形管孔列表
 
 const planeGroup = new THREE.Group(); // 一个独立的剖面标注组
 
 let sphereStart; // 起点小红点
 let sphereEnd; // 终点小红点
 
-const paramsList = []; // 剖面和管孔参数列表
+const planeParamsList = []; // 剖面参数列表
 const holeParamsList = []; // 管孔参数列表
+
+UsePlaneDrag({ twin, sphereEndDragList, planeParamsList });
+const { holeDragedList } = UseHoleDrag({ twin, holeDragList });
 
 const handleChange: SelectProps['onChange'] = (val: number) => {
     hole.value = val;
@@ -94,15 +99,38 @@ const onMark = () => {
 };
 
 const onSubmit = () => {
-    const length = average(paramsList, 'length');
-    const depth = average(paramsList, 'depth');
-    const width = average(paramsList, 'width');
+    const length = Math.ceil(average(planeParamsList, 'length'));
+    const depth = Math.ceil(average(planeParamsList, 'depth'));
+    const width = Math.ceil(average(planeParamsList, 'width'));
 
-    console.log('submit--length-depth-width', length, depth, width);
+    // 剖面列表
+    planeParamsList.forEach((plane) => {
+        // holeParamsList 是双击创建的初始数据
+        // holeDragedList.value 是拖拽之后生成的最新位置的数据
+        // 循环遍历的时候用最新的数据
+        holeDragedList.value.forEach((hole) => {
+            // 管孔列表
+            const isContain = box3IsContainsPoint(plane, hole, twin);
+            if (isContain && !isExist(plane.holeList, hole)) {
+                plane.holeList.push(hole);
+            }
+        });
+    });
+
+    const paramsData = {
+        modelPropertyMap: {
+            wellLength: length,
+            wellWidth: width,
+            wellDepth: depth
+        },
+        facadeDataList: cloneDeep(planeParamsList)
+    };
+
+    console.log('paramsData', paramsData.facadeDataList);
 };
 
 // 画小圆点
-const drawSphere = (point, type) => {
+const drawSphere = (point: THREE.Vector3, type: string) => {
     if (!point) {
         clickNum = 0;
         return console.warn('请点击网格模型区域');
@@ -118,86 +146,84 @@ const drawSphere = (point, type) => {
     return sphere;
 };
 
-const onKeyDown = (event) => {
+const onKeyDown = (event: { code: string }) => {
     if (['Escape'].includes(event.code)) {
         onMark();
     }
 };
 
-const onDblClick = (event) => {
+// 绘制剖面
+const onDrewPlane = (event: MouseEvent) => {
+    clickNum += 1;
+    if (clickNum === 1) {
+        const point = getRayCasterPoint(event, twin);
+        p1 = point;
+        sphereStart = drawSphere(point, '起点坐标');
+        planeGroup.add(sphereStart);
+        const eventType = 'dblclick';
+        planeGroup.name = `${eventType}-剖面标注组${pageNum}`;
+        planeGroup.userData = {
+            pageNum,
+            eventType
+        };
+        twin.scene.add(planeGroup);
+    } else {
+        const point = getRayCasterPoint(event, twin);
+        p2 = point;
+        if (p1 && p2) {
+            // 画剖面
+            const { length, width, depth } = drewRect(p1, p2, pageNum);
+            sphereEnd = drawSphere(point, '终点坐标');
+
+            const params = { p1, p2, pageNum, length, width, depth, holeList: [] };
+            planeParamsList.push(params);
+
+            pageNum += 1;
+        }
+        clickNum = 0;
+        p1 = null;
+        p2 = null;
+    }
+};
+
+// 绘制管孔
+const onDrewHole = (event: MouseEvent) => {
+    const _pageNum = pageNum;
+    const point = getRayCasterPoint(event, twin);
+
+    const ellipse = drewCircleHole(point, hole.value, _pageNum - 1, message);
+    ellipse.name = `剖面序号${_pageNum - 1}-管孔直径${ellipse.userData.hole}`;
+    if (!ellipse) return;
+    holeDragList.push(ellipse);
+
+    const holeParams = {
+        hole: hole.value,
+        point,
+        mesh: ellipse
+    };
+
+    holeParamsList.push(cloneDeep(holeParams)); // 深拷贝之后就不能修改管孔颜色了
+    twin.scene.add(ellipse);
+};
+
+// 双击事件
+const onDblClick = (event: MouseEvent) => {
     event.preventDefault();
     // event.button 枚举：0 代表左键，1 代表中键，2 代表右键；
     // 仅左键支持绘制，因为右键绘制和拖拽功能冲突;
     if (event.button !== 0) return;
-    if (planeMarkIng.value) {
-        clickNum += 1;
-        if (clickNum === 1) {
-            const point = getRayCasterPoint(event, twin);
-            p1 = point;
-            sphereStart = drawSphere(point, '起点坐标');
-            planeGroup.add(sphereStart);
-            const eventType = 'dblclick';
-            planeGroup.name = `${eventType}-剖面标注组${pageNum}`;
-            planeGroup.userData = {
-                pageNum,
-                eventType
-            };
-            twin.scene.add(planeGroup);
-        } else {
-            const point = getRayCasterPoint(event, twin);
-            p2 = point;
-            if (p1 && p2) {
-                // 画剖面
-                const { length, width, depth } = drewRect(p1, p2, pageNum);
-                sphereEnd = drawSphere(point, '终点坐标');
 
-                const params = { p1, p2, pageNum, length, width, depth };
-                paramsList.push(params);
-
-                // 提取剖面标注和拖拽的逻辑
-                UsePlaneDrag({ twin, planeList, paramsList, planeGroup });
-                pageNum += 1;
-            }
-            clickNum = 0;
-            p1 = null;
-            p2 = null;
-        }
-    }
+    // 剖面标注
+    planeMarkIng.value && onDrewPlane(event);
 
     // 圆形管孔标注
-    if (holeMarkIng.value) {
-        const point = getRayCasterPoint(event, twin);
-        const ellipse = drewCircleHole(point, hole.value, pageNum);
-        ellipse.name = `剖面序号${pageNum}-管孔直径${ellipse.userData.hole}`;
-        if (!ellipse) return;
-        circleList.push(ellipse);
+    holeMarkIng.value && onDrewHole(event);
 
-        const holeParams = {
-            hole: hole.value,
-            pageNum,
-            point
-        };
-
-        // 提取管孔标注和拖拽的逻辑
-        UseHoleDrag({
-            twin,
-            circleList,
-            paramsList,
-            holeParams
-        });
-
-        holeParamsList.push(holeParams);
-
-        // console.log('hole---dbclick--holeParams', holeParams);
-
-        twin.scene.add(ellipse);
-    }
-
-    // 最后记得重新渲染canvas画布
+    // 最后记得重新渲染 canvas 画布
     css2RendererStyle(twin);
 };
 
-const onMouseMove = (event) => {
+const onMouseMove = (event: MouseEvent) => {
     event.preventDefault();
     const point = getRayCasterPoint(event, twin);
     if (!planeMarkIng.value || !point) {
@@ -238,7 +264,7 @@ const onMouseMove = (event) => {
         const { rect, sizeAC, sizeDB, sizeAD, sizeCB, pageNumber } = drewRect(p1, point, pageNum);
 
         planeGroup.add(sizeAC, sizeDB, sizeAD, sizeCB, pageNumber, rect, sphereStart, sphereEnd);
-        planeList.push(sphereEnd);
+        sphereEndDragList.push(sphereEnd);
     }
 };
 
@@ -258,7 +284,10 @@ const destroyGlobalVariable = () => {
     p1 = null;
     p2 = null;
     pageNum = null;
-    circleList = null;
+    sphereEndDragList = null;
+    holeDragList = null;
+    sphereStart = null;
+    sphereEnd = null;
 };
 
 onUnmounted(() => {
