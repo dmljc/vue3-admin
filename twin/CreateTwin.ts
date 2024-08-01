@@ -42,13 +42,14 @@ export class CreateTwin {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 8000);
-        this.camera.position.set(2, 0, 0);
+        this.camera.position.set(2, 2, 2);
         this.camera.lookAt(0, 0, 0);
 
         // 渲染器
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
-            logarithmicDepthBuffer: true
+            logarithmicDepthBuffer: true,
+            preserveDrawingBuffer: true // html2canvas 需要
         });
         this.renderer.setClearColor(0xffffff);
         this.renderer.setSize(this.width, this.height);

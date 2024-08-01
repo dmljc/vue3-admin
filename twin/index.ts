@@ -15,4 +15,7 @@ export {
     createHoleSize,
     average,
     box3IsContainsPoint,
+    removePlanes,
+    transform3DCoordsTo2D,
+    rangRingFn,
 } from './Utils';

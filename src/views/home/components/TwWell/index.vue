@@ -1,39 +1,105 @@
 <template>
-    <div class="tools">
-        <div
-            @click="onMark"
-            :style="{
-                background: planeMarkIng ? '#ddd' : 'rgba(255, 255, 255, 0.4)'
-            }"
-        >
-            剖面标注:
-            {{ planeMarkIng ? '结束' : '开始' }}
-        </div>
-        <div
-            @click="onMark"
-            :style="{
-                background: holeMarkIng ? '#ddd' : 'rgba(255, 255, 255, 0.4)'
-            }"
-        >
-            圆形管孔标注:
-            {{ holeMarkIng ? '结束' : '开始' }}
-        </div>
-        <a-select
-            v-model:value="hole"
-            :options="circleHoleEnum"
-            style="width: 100px"
-            @change="handleChange"
-        />
-
-        <br />
-        <a-button @click="onSubmit">提 交</a-button>
+    <div class="root">
+        <header class="tools">
+            <div class="tools__left">
+                <span
+                    @click="onMark('plane')"
+                    :class="['tools__left--item', isMarking === 'plane' && 'tools__left--actived']"
+                >
+                    <FormOutlined />
+                    <span>剖面标注</span>
+                </span>
+                <span
+                    @click="onMark('hole')"
+                    :class="['tools__left--item', isMarking === 'hole' && 'tools__left--actived']"
+                >
+                    <ExclamationCircleOutlined />
+                    <span>管孔标注</span>
+                </span>
+                <span class="tools__left--item">
+                    <MinusCircleOutlined />
+                    <span>孔径：</span>
+                    <a-select
+                        v-model:value="hole"
+                        :options="circleHoleEnum"
+                        style="width: 90px"
+                        @change="handleChange"
+                    />
+                </span>
+                <span
+                    @click="onMark('ranging')"
+                    :class="[
+                        'tools__left--item',
+                        isMarking === 'ranging' && 'tools__left--actived'
+                    ]"
+                >
+                    <TagOutlined />
+                    <span>测距</span>
+                </span>
+                <span @click="onMark('election')" class="tools__left--item">
+                    <SplitCellsOutlined />
+                    <span>生成立视图</span>
+                </span>
+                <span @click="onScreenshot" class="tools__left--item">
+                    <CameraOutlined />
+                    <span>快照</span>
+                </span>
+                <span @click="onSubmit" class="tools__left--item">
+                    <SaveOutlined />
+                    <span>提交</span>
+                </span>
+            </div>
+            <div class="tools__right">
+                <span
+                    @click="onView('x')"
+                    :class="['tools__left--item', viewType === 'x' && 'tools__left--actived']"
+                >
+                    <CodeSandboxOutlined />
+                    <span>正视图</span>
+                </span>
+                <span
+                    @click="onView('z')"
+                    :class="['tools__left--item', viewType === 'z' && 'tools__left--actived']"
+                >
+                    <CodeSandboxOutlined />
+                    <span>侧视图</span>
+                </span>
+                <span
+                    @click="onView('y')"
+                    :class="['tools__left--item', viewType === 'y' && 'tools__left--actived']"
+                >
+                    <CodeSandboxOutlined />
+                    <span>俯视图</span>
+                </span>
+                <span @click="onView('reset')" class="tools__left--item">
+                    <SyncOutlined />
+                    <span>复位</span>
+                </span>
+                <span class="tools__left--item">
+                    <MoreOutlined />
+                </span>
+            </div>
+        </header>
+        <div ref="webgl"></div>
     </div>
-    <div ref="webgl"></div>
 </template>
+<!-- 移动端项目先在h5项目里边验证是否能正常渲染 -->
 
 <script setup lang="ts">
 import * as THREE from 'three';
 import { ref, onMounted, onUnmounted } from 'vue';
+import {
+    FormOutlined,
+    ExclamationCircleOutlined,
+    MinusCircleOutlined,
+    TagOutlined,
+    SplitCellsOutlined,
+    CameraOutlined,
+    SaveOutlined,
+    CodeSandboxOutlined,
+    SyncOutlined,
+    MoreOutlined
+} from '@ant-design/icons-vue';
 import { message, type SelectProps } from 'ant-design-vue';
 import { cloneDeep } from 'lodash-es';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -46,21 +112,25 @@ import {
     drewRect,
     drewCircleHole,
     average,
-    box3IsContainsPoint
+    box3IsContainsPoint,
+    removePlanes,
+    rangRingFn
 } from 'twin/index';
+import html2canvas from 'html2canvas';
 import { circleHoleEnum, isExist } from './utils';
 import UseHoleDrag from './useHoleDrag.js';
 import UsePlaneDrag from './usePlaneDrag.js';
 import './index.less';
 
 const webgl = ref<HTMLDivElement>();
-const planeMarkIng = ref<boolean>(true); // 剖面标注
-const holeMarkIng = ref<boolean>(false); // 管孔标注
+const isMarking = ref<string>(''); // 当前选中项
+const viewType = ref<string>(''); // 视图方向
 
 const twin = new CreateTwin();
 const loader = new GLTFLoader();
 const hole = ref<number>(175); // 管孔直径尺寸
 
+let currentMesh: THREE.Mesh | null = null; // 当前的模型
 let clickNum: number = 0; // 记录点击次数
 let p1: THREE.Vector3 = null; // 起点坐标
 let p2: THREE.Vector3 = null; // 终点坐标
@@ -71,11 +141,17 @@ let holeDragList = []; // 圆形管孔列表
 
 const planeGroup = new THREE.Group(); // 一个独立的剖面标注组
 
-let sphereStart; // 起点小红点
-let sphereEnd; // 终点小红点
+let sphereStart: THREE.Object3D<THREE.Object3DEventMap>; // 起点小红点
+let sphereEnd: THREE.Object3D<THREE.Object3DEventMap>; // 终点小红点
 
 const planeParamsList = []; // 剖面参数列表
 const holeParamsList = []; // 管孔参数列表
+
+// 测距组
+const rangingGroup = new THREE.Group();
+let rangingP1 = null;
+let rangingP2 = null;
+let rangingNum = 0;
 
 UsePlaneDrag({ twin, sphereEndDragList, planeParamsList });
 const { holeDragedList } = UseHoleDrag({ twin, holeDragList });
@@ -87,15 +163,33 @@ const handleChange: SelectProps['onChange'] = (val: number) => {
 // 加载gltf文件
 loader.load('/图维建模数据/textured_output08.gltf', (gltf) => {
     const mesh = gltf.scene.children[0];
+    currentMesh = mesh as THREE.Mesh;
     box3Center(mesh);
     mesh.name = '3d scanner 模型';
     twin.scene.add(mesh);
 });
 
 // 剖面标注
-const onMark = () => {
-    planeMarkIng.value = !planeMarkIng.value;
-    holeMarkIng.value = !holeMarkIng.value;
+const onMark = (type: string) => {
+    isMarking.value = type;
+    viewType.value = '';
+};
+
+// 快照
+const onScreenshot = () => {
+    html2canvas(webgl.value, {
+        width: window.innerWidth,
+        height: window.innerHeight - 132,
+        logging: false,
+        useCORS: true,
+        allowTaint: true // 跨域相关
+    }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = `${+new Date()}.png`;
+        link.click();
+    });
 };
 
 const onSubmit = () => {
@@ -108,7 +202,7 @@ const onSubmit = () => {
         // holeParamsList 是双击创建的初始数据
         // holeDragedList.value 是拖拽之后生成的最新位置的数据
         // 循环遍历的时候用最新的数据
-        holeDragedList.value.forEach((hole) => {
+        (holeDragedList.value || holeParamsList).forEach((hole) => {
             // 管孔列表
             const isContain = box3IsContainsPoint(plane, hole, twin);
             if (isContain && !isExist(plane.holeList, hole)) {
@@ -126,14 +220,30 @@ const onSubmit = () => {
         facadeDataList: cloneDeep(planeParamsList)
     };
 
-    console.log('paramsData', paramsData.facadeDataList);
+    console.log('paramsData', paramsData);
+};
+
+// 查看视图
+const onView = (type: string) => {
+    viewType.value = type;
+    if (type === 'x') {
+        twin.camera.position.set(2, 0, 0);
+    } else if (type === 'z') {
+        twin.camera.position.set(0, 0, 2);
+    } else if (type === 'y') {
+        twin.camera.position.set(0, 2, 0);
+    } else if (type === 'reset') {
+        twin.camera.position.set(2, 2, 2);
+    }
+    isMarking.value = '';
+    twin.camera.lookAt(0, 0, 0);
 };
 
 // 画小圆点
 const drawSphere = (point: THREE.Vector3, type: string) => {
     if (!point) {
-        clickNum = 0;
-        return console.warn('请点击网格模型区域');
+        message.warn('请点击模型非空区域xx');
+        return null;
     }
     const sphere = createSphere(point, twin.camera);
     const eventType = 'drag';
@@ -146,9 +256,14 @@ const drawSphere = (point: THREE.Vector3, type: string) => {
     return sphere;
 };
 
-const onKeyDown = (event: { code: string }) => {
-    if (['Escape'].includes(event.code)) {
-        onMark();
+// 射线拾取结果处理
+const rayCasterPoint = (event: MouseEvent) => {
+    const point = getRayCasterPoint(event, twin);
+    if (point) {
+        return point;
+    } else {
+        message.warn('请点击模型非空区域');
+        return null;
     }
 };
 
@@ -156,26 +271,37 @@ const onKeyDown = (event: { code: string }) => {
 const onDrewPlane = (event: MouseEvent) => {
     clickNum += 1;
     if (clickNum === 1) {
-        const point = getRayCasterPoint(event, twin);
+        const point = rayCasterPoint(event);
+        if (!point) return;
         p1 = point;
         sphereStart = drawSphere(point, '起点坐标');
-        planeGroup.add(sphereStart);
         const eventType = 'dblclick';
         planeGroup.name = `${eventType}-剖面标注组${pageNum}`;
         planeGroup.userData = {
             pageNum,
             eventType
         };
+        planeGroup.add(sphereStart);
         twin.scene.add(planeGroup);
     } else {
-        const point = getRayCasterPoint(event, twin);
+        const point = rayCasterPoint(event);
+        if (!point) return;
         p2 = point;
         if (p1 && p2) {
             // 画剖面
             const { length, width, depth } = drewRect(p1, p2, pageNum);
             sphereEnd = drawSphere(point, '终点坐标');
-
-            const params = { p1, p2, pageNum, length, width, depth, holeList: [] };
+            const params = {
+                p1,
+                p2,
+                pageNum,
+                length,
+                width,
+                depth,
+                holeList: [],
+                sphereStart,
+                sphereEnd
+            };
             planeParamsList.push(params);
 
             pageNum += 1;
@@ -189,9 +315,9 @@ const onDrewPlane = (event: MouseEvent) => {
 // 绘制管孔
 const onDrewHole = (event: MouseEvent) => {
     const _pageNum = pageNum;
-    const point = getRayCasterPoint(event, twin);
+    const point = rayCasterPoint(event);
 
-    const ellipse = drewCircleHole(point, hole.value, _pageNum - 1, message);
+    const ellipse = drewCircleHole(point, hole.value, _pageNum - 1);
     ellipse.name = `剖面序号${_pageNum - 1}-管孔直径${ellipse.userData.hole}`;
     if (!ellipse) return;
     holeDragList.push(ellipse);
@@ -206,6 +332,46 @@ const onDrewHole = (event: MouseEvent) => {
     twin.scene.add(ellipse);
 };
 
+// 测距功能点击生成红色小球
+const rangingClick = (event: MouseEvent, type: string) => {
+    const point = getRayCasterPoint(event, twin);
+    if (!point) {
+        return message.warn('请点击模型非空区域');
+    }
+    const sphere = createSphere(point, twin.camera);
+    sphere.name = `测距-${type}点坐标`;
+    rangingGroup.add(sphere);
+    twin.scene.add(rangingGroup);
+    return point;
+};
+
+// 测距功能
+const onDreaRanging = (event: MouseEvent) => {
+    rangingNum += 1;
+    if (rangingNum === 1) {
+        rangingP1 = rangingClick(event, '起');
+    } else {
+        rangingP2 = rangingClick(event, '终');
+
+        if (rangingP1 && rangingP2) {
+            const { line, size, delIcon } = rangRingFn(rangingP1, rangingP2);
+            line.name = '测距-线';
+            rangingGroup.add(line, size, delIcon);
+            twin.scene.add(rangingGroup);
+        }
+
+        rangingNum = 0;
+        rangingP1 = null;
+        rangingP2 = null;
+    }
+};
+
+const onKeyDown = (event: { code: string }) => {
+    if (['Escape'].includes(event.code)) {
+        viewType.value = '';
+    }
+};
+
 // 双击事件
 const onDblClick = (event: MouseEvent) => {
     event.preventDefault();
@@ -213,11 +379,16 @@ const onDblClick = (event: MouseEvent) => {
     // 仅左键支持绘制，因为右键绘制和拖拽功能冲突;
     if (event.button !== 0) return;
 
-    // 剖面标注
-    planeMarkIng.value && onDrewPlane(event);
-
-    // 圆形管孔标注
-    holeMarkIng.value && onDrewHole(event);
+    if (isMarking.value === 'plane') {
+        // 剖面标注
+        onDrewPlane(event);
+    } else if (isMarking.value === 'hole') {
+        // 圆形管孔标注
+        onDrewHole(event);
+    } else if (isMarking.value === 'ranging') {
+        // 测距
+        onDreaRanging(event);
+    }
 
     // 最后记得重新渲染 canvas 画布
     css2RendererStyle(twin);
@@ -226,46 +397,28 @@ const onDblClick = (event: MouseEvent) => {
 const onMouseMove = (event: MouseEvent) => {
     event.preventDefault();
     const point = getRayCasterPoint(event, twin);
-    if (!planeMarkIng.value || !point) {
-        clickNum = 0; // 重置点击次数
-        console.warn('请点击网格模型区域');
-        return;
-    }
-
-    sphereEnd = drawSphere(point, '终点坐标');
 
     // 移除实时创建的网格模型
-    twin.scene.traverse((item: any) => {
-        // 移除双击创建的网格模型
-        if (item.isGroup) {
-            let groupedByName: any = {};
-            // 把拖拽的同一个剖面标注的数据放在同一个数组
-            item.children.forEach((el: any) => {
-                const sName = el.name.slice(0, 10);
-                if (!groupedByName[sName]) {
-                    groupedByName[sName] = [];
-                }
-
-                groupedByName[sName].push(el);
-            });
-
-            // 从同一个数组中删除最后一次滚动之前的数据，保留最后一次拖拽的剖面标注数据
-            for (const key in groupedByName) {
-                if (Object.prototype.hasOwnProperty.call(groupedByName, key)) {
-                    const record = groupedByName[key];
-                    const startRecord = record.slice(0, record.length - 8);
-                    item.remove(...startRecord);
-                }
-            }
-        }
-    });
-
+    removePlanes(twin);
     if (p1 && point) {
+        sphereEnd = drawSphere(point, '终点坐标');
         const { rect, sizeAC, sizeDB, sizeAD, sizeCB, pageNumber } = drewRect(p1, point, pageNum);
 
         planeGroup.add(sizeAC, sizeDB, sizeAD, sizeCB, pageNumber, rect, sphereStart, sphereEnd);
         sphereEndDragList.push(sphereEnd);
     }
+
+    // 测距
+    // if (isMarking.value === 'ranging' && rangingP1 && point) {
+    //     const line = rangRingFn(rangingP1, point);
+    //     const sphere = createSphere(point, twin.camera);
+    //     sphere.name = '测距-终点坐标';
+    //     rangingGroup.add(line, sphere);
+    //     twin.scene.add(rangingGroup);
+
+    //     // rangingGroup 存在重复的数据，会出现多条线
+    //     console.log('--------rangingGroup=====', rangingGroup);
+    // }
 };
 
 document.addEventListener('keydown', onKeyDown);
@@ -274,12 +427,14 @@ twin.renderer.domElement.addEventListener('mousemove', onMouseMove);
 
 onMounted(() => {
     twin.renderer.setClearColor(0x444544);
+    document.removeEventListener('keydown', onKeyDown);
     webgl.value.appendChild(twin.renderer.domElement);
     webgl.value.appendChild(twin.css2Renderer.domElement);
 });
 
 // 销毁全局变量，防止内存泄漏
 const destroyGlobalVariable = () => {
+    currentMesh = null;
     clickNum = 0;
     p1 = null;
     p2 = null;
@@ -288,11 +443,13 @@ const destroyGlobalVariable = () => {
     holeDragList = null;
     sphereStart = null;
     sphereEnd = null;
+    rangingNum = 0;
+    rangingP1 = null;
+    rangingP2 = null;
 };
 
 onUnmounted(() => {
     destroyGlobalVariable();
-    document.removeEventListener('keydown', onKeyDown);
     twin.renderer.domElement.removeEventListener('dblclick', onDblClick);
     twin.renderer.domElement.removeEventListener('mousemove', onMouseMove);
 });

@@ -71,7 +71,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
  *@params:(point:当前点的三维坐标, camera:当前实例的相机属性)
  */
 export const createSphere = (point: THREE.Vector3, camera: THREE.PerspectiveCamera) => {
-    const L = camera.position?.clone().sub(point).length();
+    const L = camera.position.clone().sub(point).length();
     const geometry = new THREE.SphereGeometry(L / 250);
     const material = new THREE.MeshBasicMaterial({
         color: 0xff0000
@@ -112,6 +112,62 @@ export const getDistance = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) 
     const len = startPoint.clone().sub(endPoint).length();
     const lenmm = parseInt(String(len * 1000)); // mm 代表毫米
     return lenmm;
+};
+
+/*
+ *deleteIcon() 删除的图标
+ *@params:(point: 三维坐标,hole：管孔直径)
+ */
+export const deleteIcon = (point: THREE.Vector3) => {
+    const div = document.createElement('div');
+    div.style.color = '#fff';
+    div.style.border = '1px solid red';
+    div.style.padding = '1px 4px';
+    div.innerHTML = 'x';
+
+    const delIcon = new CSS2DObject(div);
+    delIcon.position.copy(point);
+    const right = 0.1;
+    delIcon.translateZ(right);
+    delIcon.name = `测距-删除`;
+    return delIcon;
+};
+
+/*
+ * 测距函数
+ *
+ */
+export const rangRingFn = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) => {
+    const line1 = new THREE.LineCurve3(startPoint, endPoint);
+    const path: THREE.CurvePath<THREE.Vector3> = new THREE.CurvePath();
+    path.curves.push(line1);
+
+    const geometry = new THREE.TubeGeometry(path.clone(), 40, 0.003, 100);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xffff00
+    });
+    const line = new THREE.Mesh(geometry, material);
+    line.name = '测距-线';
+
+    const div = document.createElement('div');
+    div.style.color = '#fff';
+    div.style.padding = '2px 6px';
+    div.style.borderRadius = '3px';
+    div.style.background = 'rgba(0, 0, 0, 0.4)';
+    div.innerHTML = `${getDistance(startPoint, endPoint)}`;
+
+    const size = new CSS2DObject(div);
+    size.name = '测距-尺寸';
+    const center = startPoint.clone().add(endPoint).divideScalar(2);
+    size.position.copy(center);
+    const delIcon = deleteIcon(endPoint);
+    delIcon.position.copy(endPoint);
+
+    return {
+        line, 
+        size,
+        delIcon,
+    };
 };
 
 /*
@@ -162,7 +218,7 @@ export const createMarkLength = (
     div.innerHTML = `${length}`;
 
     const size = new CSS2DObject(div);
-    const center = startPoint.clone().add(endPoint)?.divideScalar(2);
+    const center = startPoint.clone().add(endPoint).divideScalar(2);
     size.position.copy(center);
     const eventType = 'drag';
     const type = '尺寸';
@@ -191,7 +247,7 @@ export const createPageNum = (
     div.innerHTML = `${pageNum}`;
 
     const pageNumber = new CSS2DObject(div);
-    const center = startPoint.clone().add(endPoint)?.divideScalar(2);
+    const center = startPoint.clone().add(endPoint).divideScalar(2);
     pageNumber.position.copy(center);
     const eventType = 'drag';
     const type = '序号';
@@ -230,7 +286,7 @@ export const createLine = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) =
  */
 export const css2RendererStyle = (twin: CreateTwin) => {
     twin.css2Renderer.domElement.style.position = 'absolute';
-    twin.css2Renderer.domElement.style.top = '105px';
+    twin.css2Renderer.domElement.style.top = '160px';
     twin.css2Renderer.domElement.style.pointerEvents = 'none';
 };
 
@@ -282,35 +338,11 @@ export const drewRect = (startPoint: THREE.Vector3, endPoint: THREE.Vector3, pag
         pageNumber
     };
 };
-
-/*
- *deleteIcon() 删除的图标
- *@params:(point: 三维坐标,hole：管孔直径)
- */
-export const deleteIcon = (point: THREE.Vector3, hole: number) => {
-    const div = document.createElement('div');
-    div.style.color = '#fff';
-    div.style.border = '1px solid red';
-    div.style.padding = '2px 4px';
-    div.innerHTML = 'x';
-
-    const delIcon = new CSS2DObject(div);
-    delIcon.position.copy(point);
-    const right = -hole / 2000 - 0.01;
-    delIcon.translateZ(right);
-    delIcon.name = `删除图标:直径${hole}`;
-    return delIcon;
-};
-
 /*
  *drewCircleHole() 绘制圆形管孔
  *@params:(point: 三维坐标,hole：管孔直径)
  */
-export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: number, message) => {
-    if (!point) {
-        message.warning('请点击非管孔区域');
-        return;
-    }
+export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: number) => {
     const radius = hole / (1000 * 2);
     const tube = 0.003; // 即圆弧线的粗细
     // 圆环几何体
@@ -395,17 +427,9 @@ export const box3IsContainsPoint = (plane, hole, twin) => {
     box3Hole.expandByObject(hole);
 
     // 允许剖面最小包围盒存在的误差范围
-    const temp = 0.05; 
-    box3Plane.min = new THREE.Vector3(
-        Math.min(sx, ex) - temp,
-        Math.min(sy, ey),
-        Math.min(sz, ez)
-    );
-    box3Plane.max = new THREE.Vector3(
-        Math.max(sx, ex) + temp,
-        Math.max(sy, ey),
-        Math.max(sz, ez)
-    );
+    const temp = 0.05;
+    box3Plane.min = new THREE.Vector3(Math.min(sx, ex) - temp, Math.min(sy, ey), Math.min(sz, ez));
+    box3Plane.max = new THREE.Vector3(Math.max(sx, ex) + temp, Math.max(sy, ey), Math.max(sz, ez));
 
     // 检查 box3Plane 是否包含 box3Hole
     const bool = box3Plane.containsBox(box3Hole);
@@ -416,8 +440,54 @@ export const box3IsContainsPoint = (plane, hole, twin) => {
     // twin.scene.remove(helperHole);
     const helperHole = new THREE.Box3Helper(box3Hole, 0x0000ff);
 
-    console.log('helperHole2', helperHole);
     twin.scene.add(helperPlane, helperHole);
 
     return bool;
+};
+
+// 移除实时创建的网格模型
+export const removePlanes = (twin: CreateTwin) => {
+    twin.scene.traverse((item: any) => {
+        // 移除双击创建的网格模型
+        if (item.isGroup) {
+            const groupedByName: any = {};
+            // 把拖拽的同一个剖面标注的数据放在同一个数组
+            item.children.forEach((el: any) => {
+                const sName = el.name.slice(0, 10);
+                if (!groupedByName[sName]) {
+                    groupedByName[sName] = [];
+                }
+
+                groupedByName[sName].push(el);
+            });
+
+            // 从同一个数组中删除最后一次滚动之前的数据，保留最后一次拖拽的剖面标注数据
+            for (const key in groupedByName) {
+                if (Object.prototype.hasOwnProperty.call(groupedByName, key)) {
+                    const record = groupedByName[key];
+                    const startRecord = record.slice(0, record.length - 8);
+                    item.remove(...startRecord);
+                }
+            }
+        }
+    });
+};
+
+// 三维坐标转二维坐标
+export const transform3DCoordsTo2D = (camera: THREE.Camera, point) => {
+    // 假设camera是你的相机对象，renderer是你的渲染器对象
+    const vector = new THREE.Vector3(...point); // x, y, z 是你想要转换的三维坐标
+    vector.project(camera);
+
+    const halfWidth = window.innerWidth / 2;
+    const halfHeight = window.innerHeight / 2;
+
+    vector.x = vector.x * halfWidth + halfWidth;
+    vector.y = -(vector.y * halfHeight) + halfHeight;
+
+    // 此时 vector.x 和 vector.y 是屏幕坐标
+    return {
+        x: parseInt(vector.x.toString()),
+        y: parseInt(vector.y.toString())
+    };
 };

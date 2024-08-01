@@ -31,12 +31,14 @@ const usePlaneDrag = (props: any) => {
 
     const onHandle = (e: any) => {
         const params = planeParamsList?.filter((el: any) => {
-            if (el.pageNum === Number.parseInt(e.object.name.slice(9, 10))) {
+            if (el.pageNum === parseInt(e.object.name.slice(9, 10))) {
                 return el;
             }
         })[0];
 
         let { p1, pageNum, sphereStart, sphereEnd } = params ?? {};
+
+        if (!p1) return;
 
         const endPoint = e.object.position;
 
@@ -135,7 +137,7 @@ const usePlaneDrag = (props: any) => {
     };
 
     // 拖拽中
-    dragControls.addEventListener('drag', function (e) {
+    dragControls.addEventListener('drag', (e) => {
         twin.controls.enabled = false;
         onHandle(e);
     });

@@ -4,7 +4,12 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createHoleSize } from 'twin/index';
 
-const useHoleDrag = (props: any) => {
+interface Props {
+    twin: any;
+    holeDragList: any;
+}
+
+const useHoleDrag = (props: Props) => {
     const { twin, holeDragList } = props;
 
     let holeSize: CSS2DObject; // 管孔尺寸
@@ -23,7 +28,7 @@ const useHoleDrag = (props: any) => {
         holeSize = createHoleSize(e);
         twin.scene.add(holeSize);
         // 对拖拽的管孔列表遍历获取最新的坐标数据
-        const result = holeDragList.map((item: { uuid: any }) => {
+        const result = holeDragList.map((item: { uuid: string }) => {
             if (item.uuid === e.object.uuid) {
                 return e.object;
             } else {
@@ -81,11 +86,23 @@ const useHoleDrag = (props: any) => {
 
     // 删除管孔
     document.getElementById('delete')?.addEventListener('click', () => {
-        const index = holeDragList.findIndex(
-            (item: { uuid: string }) => item.uuid === hoverHole?.uuid
-        );
+        let index;
+        if (holeDragedList.value.length) {
+            index = holeDragedList.value.findIndex(
+                (item: { uuid: string }) => item.uuid === hoverHole?.uuid
+            );
+        } else {
+            index = holeDragList.findIndex(
+                (item: { uuid: string }) => item.uuid === hoverHole?.uuid
+            );
+        }
+
         // 从拖拽列表中移除
-        holeDragList.splice(index, 1);
+        if (holeDragedList.value.length) {
+            holeDragedList.value.splice(index, 1);
+        } else {
+            holeDragList.splice(index, 1);
+        }
 
         twin.scene.remove(hoverHole);
         rightMenu.style.display = 'none';

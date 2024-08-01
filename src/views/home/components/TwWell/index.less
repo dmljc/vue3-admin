@@ -1,17 +1,38 @@
-.tools {
-    position: absolute;
-    left: 200px;
-    top: 200px;
+.root {
+    width: 100%;
+    height: calc(100vh - 136px);
+    overflow: hidden;
 
-    div {
-        width: 120px;
-        height: 120px;
-        line-height: 120px;
-        text-align: center;
-        border-radius: 100%;
+    .tools {
+        padding: 8px;
+        display: flex;
+        background-color: #eee;
 
-        &:hover {
-            cursor: pointer;
+        &__left {
+            flex: 1;
+        }
+
+        &__right {
+            line-height: 32px;
+        }
+
+        &__left,
+        &__right {
+            &--item {
+                span:first-child {
+                    margin-left: 24px;
+                    margin-right: 6px;
+                }
+
+                &:hover {
+                    cursor: pointer;
+                    color: #007bff;
+                }
+            }
+
+            &--actived {
+                color: #007bff;
+            }
         }
     }
 }
