@@ -3,6 +3,13 @@
         <header class="tools">
             <div class="tools__left">
                 <span
+                    @click="onMark('upload')"
+                    :class="['tools__left--item', isMarking === 'upload' && 'tools__left--actived']"
+                >
+                    <CloudUploadOutlined />
+                    <span>上传 3d scanner</span>
+                </span>
+                <span
                     @click="onMark('plane')"
                     :class="['tools__left--item', isMarking === 'plane' && 'tools__left--actived']"
                 >
@@ -94,6 +101,7 @@ import {
     MinusCircleOutlined,
     TagOutlined,
     SplitCellsOutlined,
+    CloudUploadOutlined,
     CameraOutlined,
     SaveOutlined,
     CodeSandboxOutlined,
@@ -114,7 +122,7 @@ import {
     average,
     box3IsContainsPoint,
     removePlanes,
-    rangRingFn
+    rangingFn
 } from 'twin/index';
 import html2canvas from 'html2canvas';
 import { circleHoleEnum, isExist } from './utils';
@@ -149,9 +157,10 @@ const holeParamsList = []; // 管孔参数列表
 
 // 测距组
 const rangingGroup = new THREE.Group();
-let rangingP1 = null;
-let rangingP2 = null;
-let rangingNum = 0;
+let rangingP1 = null; // 测距起点坐标
+let rangingP2 = null; // 测距终点坐标
+let rangingClickNum = 0; // 测距点击次数
+let rangingNum = 0; // 测距序号
 
 UsePlaneDrag({ twin, sphereEndDragList, planeParamsList });
 const { holeDragedList } = UseHoleDrag({ twin, holeDragList });
@@ -258,7 +267,7 @@ const drawSphere = (point: THREE.Vector3, type: string) => {
 
 // 射线拾取结果处理
 const rayCasterPoint = (event: MouseEvent) => {
-    const point = getRayCasterPoint(event, twin);
+    const { point } = getRayCasterPoint(event, twin);
     if (point) {
         return point;
     } else {
@@ -316,7 +325,6 @@ const onDrewPlane = (event: MouseEvent) => {
 const onDrewHole = (event: MouseEvent) => {
     const _pageNum = pageNum;
     const point = rayCasterPoint(event);
-
     const ellipse = drewCircleHole(point, hole.value, _pageNum - 1);
     ellipse.name = `剖面序号${_pageNum - 1}-管孔直径${ellipse.userData.hole}`;
     if (!ellipse) return;
@@ -333,13 +341,18 @@ const onDrewHole = (event: MouseEvent) => {
 };
 
 // 测距功能点击生成红色小球
-const rangingClick = (event: MouseEvent, type: string) => {
-    const point = getRayCasterPoint(event, twin);
+const rangingClick = (event: MouseEvent, rangingNum: number, type: string) => {
+    const { point } = getRayCasterPoint(event, twin);
     if (!point) {
         return message.warn('请点击模型非空区域');
     }
     const sphere = createSphere(point, twin.camera);
-    sphere.name = `测距-${type}点坐标`;
+    const _type = `${type}点坐标`;
+    sphere.name = `测距-序号${rangingNum}-${_type}`;
+    sphere.userData = {
+        rangingNum,
+        type: _type
+    };
     rangingGroup.add(sphere);
     twin.scene.add(rangingGroup);
     return point;
@@ -347,28 +360,43 @@ const rangingClick = (event: MouseEvent, type: string) => {
 
 // 测距功能
 const onDreaRanging = (event: MouseEvent) => {
-    rangingNum += 1;
-    if (rangingNum === 1) {
-        rangingP1 = rangingClick(event, '起');
+    rangingClickNum += 1;
+    if (rangingClickNum === 1) {
+        rangingP1 = rangingClick(event, rangingNum, '起');
     } else {
-        rangingP2 = rangingClick(event, '终');
+        rangingP2 = rangingClick(event, rangingNum, '终');
 
         if (rangingP1 && rangingP2) {
-            const { line, size, delIcon } = rangRingFn(rangingP1, rangingP2);
-            line.name = '测距-线';
+            const { line, size, delIcon } = rangingFn(rangingP1, rangingP2, rangingNum);
             rangingGroup.add(line, size, delIcon);
+            rangingGroup.name = '测距组';
             twin.scene.add(rangingGroup);
+            rangingNum += 1;
         }
 
-        rangingNum = 0;
+        rangingClickNum = 0;
         rangingP1 = null;
         rangingP2 = null;
     }
 };
 
+// 取消
 const onKeyDown = (event: { code: string }) => {
     if (['Escape'].includes(event.code)) {
         viewType.value = '';
+    }
+};
+
+// 单击删除测距
+const onClick = (event: MouseEvent) => {
+    const { mesh } = getRayCasterPoint(event, twin);
+    if (mesh.object.userData.type === '终点坐标') {
+        twin.scene.traverse((obj) => {
+            if (obj.userData.rangingNum === mesh.object.userData.rangingNum) {
+                // rangingGroup.remove(obj);
+                obj.visible = false;
+            }
+        });
     }
 };
 
@@ -396,7 +424,7 @@ const onDblClick = (event: MouseEvent) => {
 
 const onMouseMove = (event: MouseEvent) => {
     event.preventDefault();
-    const point = getRayCasterPoint(event, twin);
+    const { point } = getRayCasterPoint(event, twin);
 
     // 移除实时创建的网格模型
     removePlanes(twin);
@@ -407,27 +435,15 @@ const onMouseMove = (event: MouseEvent) => {
         planeGroup.add(sizeAC, sizeDB, sizeAD, sizeCB, pageNumber, rect, sphereStart, sphereEnd);
         sphereEndDragList.push(sphereEnd);
     }
-
-    // 测距
-    // if (isMarking.value === 'ranging' && rangingP1 && point) {
-    //     const line = rangRingFn(rangingP1, point);
-    //     const sphere = createSphere(point, twin.camera);
-    //     sphere.name = '测距-终点坐标';
-    //     rangingGroup.add(line, sphere);
-    //     twin.scene.add(rangingGroup);
-
-    //     // rangingGroup 存在重复的数据，会出现多条线
-    //     console.log('--------rangingGroup=====', rangingGroup);
-    // }
 };
 
 document.addEventListener('keydown', onKeyDown);
+twin.renderer.domElement.addEventListener('click', onClick);
 twin.renderer.domElement.addEventListener('dblclick', onDblClick);
 twin.renderer.domElement.addEventListener('mousemove', onMouseMove);
 
 onMounted(() => {
     twin.renderer.setClearColor(0x444544);
-    document.removeEventListener('keydown', onKeyDown);
     webgl.value.appendChild(twin.renderer.domElement);
     webgl.value.appendChild(twin.css2Renderer.domElement);
 });
@@ -443,13 +459,14 @@ const destroyGlobalVariable = () => {
     holeDragList = null;
     sphereStart = null;
     sphereEnd = null;
-    rangingNum = 0;
+    rangingClickNum = 0;
     rangingP1 = null;
     rangingP2 = null;
 };
 
 onUnmounted(() => {
     destroyGlobalVariable();
+    document.removeEventListener('keydown', onKeyDown);
     twin.renderer.domElement.removeEventListener('dblclick', onDblClick);
     twin.renderer.domElement.removeEventListener('mousemove', onMouseMove);
 });

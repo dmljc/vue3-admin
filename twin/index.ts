@@ -17,5 +17,5 @@ export {
     box3IsContainsPoint,
     removePlanes,
     transform3DCoordsTo2D,
-    rangRingFn,
+    rangingFn,
 } from './Utils';

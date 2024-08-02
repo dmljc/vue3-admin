@@ -63,7 +63,10 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
         point = result[0].point;
     }
 
-    return point;
+    return {
+        point,
+        mesh: result[0],
+    };
 };
 
 /*
@@ -115,21 +118,23 @@ export const getDistance = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) 
 };
 
 /*
- *deleteIcon() 删除的图标
+ *deleteIcon() 测距功能的删除图标
  *@params:(point: 三维坐标,hole：管孔直径)
  */
-export const deleteIcon = (point: THREE.Vector3) => {
+export const deleteIcon = (point: THREE.Vector3, rangingNum: number) => {
     const div = document.createElement('div');
-    div.style.color = '#fff';
+    div.style.color = '#ff0';
     div.style.border = '1px solid red';
-    div.style.padding = '1px 4px';
+    div.style.padding = '1px 6px';
     div.innerHTML = 'x';
-
     const delIcon = new CSS2DObject(div);
     delIcon.position.copy(point);
-    const right = 0.1;
-    delIcon.translateZ(right);
-    delIcon.name = `测距-删除`;
+    const type = '删除';
+    delIcon.name = `测距-序号${rangingNum}-${type}`;
+    delIcon.userData = {
+        rangingNum,
+        type
+    };
     return delIcon;
 };
 
@@ -137,7 +142,11 @@ export const deleteIcon = (point: THREE.Vector3) => {
  * 测距函数
  *
  */
-export const rangRingFn = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) => {
+export const rangingFn = (
+    startPoint: THREE.Vector3,
+    endPoint: THREE.Vector3,
+    rangingNum: number
+) => {
     const line1 = new THREE.LineCurve3(startPoint, endPoint);
     const path: THREE.CurvePath<THREE.Vector3> = new THREE.CurvePath();
     path.curves.push(line1);
@@ -147,7 +156,12 @@ export const rangRingFn = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) =
         color: 0xffff00
     });
     const line = new THREE.Mesh(geometry, material);
-    line.name = '测距-线';
+    const typeLine = '线';
+    line.name = `测距-序号${rangingNum}-${typeLine}`;
+    line.userData = {
+        rangingNum,
+        type: typeLine
+    };
 
     const div = document.createElement('div');
     div.style.color = '#fff';
@@ -157,16 +171,22 @@ export const rangRingFn = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) =
     div.innerHTML = `${getDistance(startPoint, endPoint)}`;
 
     const size = new CSS2DObject(div);
-    size.name = '测距-尺寸';
+    const typeSize = '尺寸';
+    size.name = `测距-序号${rangingNum}-${typeSize}`;
+    size.userData = {
+        rangingNum,
+        type: typeSize
+    };
     const center = startPoint.clone().add(endPoint).divideScalar(2);
     size.position.copy(center);
-    const delIcon = deleteIcon(endPoint);
+
+    const delIcon = deleteIcon(endPoint, rangingNum);
     delIcon.position.copy(endPoint);
 
     return {
-        line, 
+        line,
         size,
-        delIcon,
+        delIcon
     };
 };
 
