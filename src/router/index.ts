@@ -11,14 +11,14 @@ export const asyncRouterMap = [
             title: 'Ant Admin'
         },
         children: [
-            {
-                path: '/home',
-                name: 'home',
-                component: () => import('@/views/home/index.vue'),
-                meta: {
-                    title: '首页'
-                }
-            },
+            // {
+            //     path: '/home',
+            //     name: 'home',
+            //     component: () => import('@/views/home/index.vue'),
+            //     meta: {
+            //         title: '首页'
+            //     }
+            // },
             {
                 path: '/user',
                 name: 'user',
@@ -62,6 +62,14 @@ export const constantRouterMap = [
         name: '404',
         component: () => import('@/components/Error/404.vue'),
         hidden: true
+    },
+    {
+        path: '/home',
+        name: 'home',
+        component: () => import('@/views/home/index.vue'),
+        meta: {
+            title: '首页'
+        }
     }
 ];
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { disposeNode, getChromeVersion } from './Utils';
 
 interface Params {
@@ -21,7 +21,6 @@ export class CreateTwin {
     width: number;
     height: number;
     css2Renderer: CSS2DRenderer;
-    createMarkLength: (p1: THREE.Vector3, p2: THREE.Vector3, length: string) => CSS2DObject;
 
     constructor(params: Params = {}) {
         const { logCameraPosition = false } = params;
@@ -60,6 +59,7 @@ export class CreateTwin {
         // css2D 渲染器
         this.css2Renderer = new CSS2DRenderer();
         this.css2Renderer.setSize(this.width, this.height);
+        this.css2Renderer.domElement.style.pointerEvents = 'none';
 
         this.renderOnce = () => {
             if (this.scene && this.camera && this.renderer) {
@@ -133,7 +133,15 @@ export class CreateTwin {
                 this.renderer = null;
             }
 
+            if (this.css2Renderer) {
+                this.renderer.dispose();
+                this.renderer.domElement = null as any;
+                this.renderer.forceContextLoss();
+                this.renderer = null;
+            }
+
             if (this.scene) {
+                this.scene.remove();
                 this.scene.clear();
                 this.scene = null;
                 this.camera = null;

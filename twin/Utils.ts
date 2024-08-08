@@ -57,6 +57,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
             return item;
         }
     });
+
     let point: THREE.Vector3 = null;
     if (result.length > 0) {
         // 获取模型上选中的一点坐标
@@ -65,7 +66,7 @@ export const getRayCasterPoint = (event: MouseEvent, twin: CreateTwin) => {
 
     return {
         point,
-        mesh: result[0],
+        mesh: result[0]
     };
 };
 
@@ -124,16 +125,17 @@ export const getDistance = (startPoint: THREE.Vector3, endPoint: THREE.Vector3) 
 export const deleteIcon = (point: THREE.Vector3, rangingNum: number) => {
     const div = document.createElement('div');
     div.style.color = '#ff0';
-    div.style.border = '1px solid red';
-    div.style.padding = '1px 6px';
     div.innerHTML = 'x';
     const delIcon = new CSS2DObject(div);
+    // point.y += 0.26;
+    const type = '测距';
+    const name = '删除';
     delIcon.position.copy(point);
-    const type = '删除';
-    delIcon.name = `测距-序号${rangingNum}-${type}`;
+    delIcon.name = `${type}-${name}-${rangingNum}`;
     delIcon.userData = {
+        type,
+        name,
         rangingNum,
-        type
     };
     return delIcon;
 };
@@ -156,11 +158,13 @@ export const rangingFn = (
         color: 0xffff00
     });
     const line = new THREE.Mesh(geometry, material);
-    const typeLine = '线';
-    line.name = `测距-序号${rangingNum}-${typeLine}`;
+    const lineType = '测距';
+    const lineName = '线';
+    line.name = `${lineType}-${lineName}-${rangingNum}`;
     line.userData = {
+        type: lineType,
+        name: lineName,
         rangingNum,
-        type: typeLine
     };
 
     const div = document.createElement('div');
@@ -171,11 +175,12 @@ export const rangingFn = (
     div.innerHTML = `${getDistance(startPoint, endPoint)}`;
 
     const size = new CSS2DObject(div);
-    const typeSize = '尺寸';
-    size.name = `测距-序号${rangingNum}-${typeSize}`;
+    const sizeType = '尺寸';
+    size.name = `${lineType}-${sizeType}-${rangingNum}`;
     size.userData = {
+        type: lineType,
+        name: sizeType,
         rangingNum,
-        type: typeSize
     };
     const center = startPoint.clone().add(endPoint).divideScalar(2);
     size.position.copy(center);
@@ -211,7 +216,7 @@ export const drawRectWithFourPoints = (points: THREE.Vector3[], name?: string) =
     const path: THREE.CurvePath<THREE.Vector3> = new THREE.CurvePath();
     path.curves.push(line1, line2, line3, line4);
 
-    const geometry = new THREE.TubeGeometry(path.clone(), 300, 0.003);
+    const geometry = new THREE.TubeGeometry(path.clone(), 300, 0.005);
     const material = new THREE.MeshBasicMaterial({
         color: 0xffff00
     });
@@ -362,9 +367,9 @@ export const drewRect = (startPoint: THREE.Vector3, endPoint: THREE.Vector3, pag
  *drewCircleHole() 绘制圆形管孔
  *@params:(point: 三维坐标,hole：管孔直径)
  */
-export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: number) => {
+export const drewCircleHole = (point: THREE.Vector3, hole: number, holeNum: number) => {
     const radius = hole / (1000 * 2);
-    const tube = 0.003; // 即圆弧线的粗细
+    const tube = 0.005; // 即圆弧线的粗细
     // 圆环几何体
     const geometry = new THREE.TorusGeometry(radius, tube);
     const material = new THREE.MeshBasicMaterial({
@@ -373,14 +378,16 @@ export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: numb
     });
 
     const sphere = new THREE.Mesh(geometry, material);
+    const type= '管孔';
     sphere.userData = {
+        type,
         hole,
-        pageNum,
+        holeNum,
         wkt: point
     };
     sphere.position.copy(point);
     sphere.rotateY(Math.PI / 2);
-    sphere.name = `圆弧管孔:直径${hole}`;
+    sphere.name = `管孔-直径${hole}-${holeNum}`;
     return sphere;
 };
 
@@ -388,7 +395,7 @@ export const drewCircleHole = (point: THREE.Vector3, hole: number, pageNum: numb
  *createHoleSize() 创建管孔尺寸
  *@params: (event: Event 对象)
  */
-export const createHoleSize = (event: any) => {
+export const createHoleSize = (event: any, holeNum: number) => {
     const { hole } = event.object.userData;
     const div = document.createElement('div');
     div.style.color = '#fff';
@@ -400,10 +407,8 @@ export const createHoleSize = (event: any) => {
     const holeSize = new CSS2DObject(div);
     // 以鼠标位置为中心
     holeSize.position.copy(event.object.position);
-    // top 表示以鼠标位置向上移动top距离
-    const top = hole / 2000 + 0.02;
-    holeSize.translateY(top);
-    holeSize.name = `管孔直径:${hole}`;
+    holeSize.position.y += hole / 480;
+    holeSize.name = `管孔-直径${hole}-${holeNum}`;
     return holeSize;
 };
 

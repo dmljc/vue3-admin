@@ -7,10 +7,11 @@ import { createHoleSize } from 'twin/index';
 interface Props {
     twin: any;
     holeDragList: any;
+    holeNum: number;
 }
 
 const useHoleDrag = (props: Props) => {
-    const { twin, holeDragList } = props;
+    const { twin, holeDragList, holeNum } = props;
 
     let holeSize: CSS2DObject; // 管孔尺寸
     let hoverHole: THREE.Object3D<THREE.Object3DEventMap>; // 当前hover选中的圆弧管孔
@@ -25,7 +26,7 @@ const useHoleDrag = (props: Props) => {
         if (holeSize) {
             twin.scene.remove(holeSize);
         }
-        holeSize = createHoleSize(e);
+        holeSize = createHoleSize(e, holeNum);
         twin.scene.add(holeSize);
         // 对拖拽的管孔列表遍历获取最新的坐标数据
         const result = holeDragList.map((item: { uuid: string }) => {

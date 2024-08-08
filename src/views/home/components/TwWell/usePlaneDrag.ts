@@ -46,7 +46,7 @@ const usePlaneDrag = (props: any) => {
             item.name.startsWith('drag')
         );
 
-        // 修改dblclick 开头的剖面标注组名称
+        // 修改dblclick 开头的剖面组名称
         if (dragGroup) {
             twin.scene.children.forEach((el: { name: string }) => {
                 const _pageNum = dragGroup.name.slice(-1);
@@ -117,7 +117,7 @@ const usePlaneDrag = (props: any) => {
         );
         sphereEndDragList.push(sphereEnd);
         const eventType = 'drag';
-        groupDrag.name = `${eventType}-剖面标注组${pageNum}`;
+        groupDrag.name = `${eventType}-剖面组${pageNum}`;
         groupDrag.userData = {
             pageNum,
             eventType
